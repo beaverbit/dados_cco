@@ -154,7 +154,7 @@ fig1.update_layout(
     height=400,
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
-st.plotly_chart(fig1, use_container_width=True)
+st.plotly_chart(fig1, width="stretch")
 
 
 # GRÁFICO 2: Taxa de Conformidade por Filial
@@ -177,7 +177,7 @@ fig2 = px.bar(
 )
 fig2.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
 fig2.update_layout(height=400, coloraxis_showscale=False)
-st.plotly_chart(fig2, use_container_width=True)
+st.plotly_chart(fig2, width="stretch")
 
 
 # GRÁFICO 3: Distribuição Mensal
@@ -204,7 +204,7 @@ fig3.update_layout(
     yaxis_title="Quantidade",
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
-st.plotly_chart(fig3, use_container_width=True)
+st.plotly_chart(fig3, width="stretch")
 
 
 # GRÁFICO 4: Análises e taxa de NC por dia da semana
@@ -253,7 +253,7 @@ fig4.update_layout(
     height=400,
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
-st.plotly_chart(fig4, use_container_width=True)
+st.plotly_chart(fig4, width="stretch")
 
 
 # GRÁFICO 5 e 6: Resultado e classificação
@@ -272,7 +272,7 @@ with col_c:
     )
     fig5.update_traces(textposition="outside")
     fig5.update_layout(height=400, showlegend=False, coloraxis_showscale=False)
-    st.plotly_chart(fig5, use_container_width=True)
+    st.plotly_chart(fig5, width="stretch")
 
 with col_d:
     st.subheader("Distribuição por Classificação")
@@ -283,7 +283,7 @@ with col_d:
         hole=0.4,
     )
     fig6.update_layout(height=400)
-    st.plotly_chart(fig6, use_container_width=True)
+    st.plotly_chart(fig6, width="stretch")
 
 
 # GRÁFICO 7: Top unidades com mais NCs
@@ -308,7 +308,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     )
     fig7.update_traces(texttemplate="%{text:,}", textposition="outside")
     fig7.update_layout(height=500, coloraxis_showscale=False)
-    st.plotly_chart(fig7, use_container_width=True)
+    st.plotly_chart(fig7, width="stretch")
 
 
 # GRÁFICO 8: NCs por gravidade
@@ -327,7 +327,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     )
     fig8.update_traces(texttemplate="%{text:,}", textposition="outside")
     fig8.update_layout(height=400, coloraxis_showscale=False)
-    st.plotly_chart(fig8, use_container_width=True)
+    st.plotly_chart(fig8, width="stretch")
 
 
 # GRÁFICO 9: Top 15 Códigos de NC mais recorrentes
@@ -357,7 +357,7 @@ if df_n_f is not None and len(df_n_f) > 0:
         yaxis=dict(tickfont=dict(size=14)),
         xaxis=dict(tickfont=dict(size=14)),
     )
-    st.plotly_chart(fig9, use_container_width=True)
+    st.plotly_chart(fig9, width="stretch")
 
 
 # GRÁFICO 10: NCs por capítulo do checklist
@@ -378,7 +378,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     )
     fig10.update_traces(texttemplate="%{text:,}", textposition="outside")
     fig10.update_layout(height=400, coloraxis_showscale=False)
-    st.plotly_chart(fig10, use_container_width=True)
+    st.plotly_chart(fig10, width="stretch")
 
 
 # GRÁFICO 11: Filial x Gravidade
@@ -414,7 +414,7 @@ if df_n_f is not None and len(df_n_f) > 0:
         yaxis_title="",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
-    st.plotly_chart(fig11, use_container_width=True)
+    st.plotly_chart(fig11, width="stretch")
 
 
 # GRÁFICO 12: NCs por dia da semana (só NCs)
@@ -442,7 +442,7 @@ if df_n_f is not None and len(df_n_f) > 0 and "dia_semana" in df_a_f.columns:
     )
     fig12.update_traces(texttemplate="%{text:,}", textposition="outside")
     fig12.update_layout(height=400, coloraxis_showscale=False)
-    st.plotly_chart(fig12, use_container_width=True)
+    st.plotly_chart(fig12, width="stretch")
 
 
 # GRÁFICO 13: Distribuição de Gravidade por Capítulo
@@ -477,7 +477,7 @@ if df_n_f is not None and len(df_n_f) > 0:
         yaxis_title="NCs",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
-    st.plotly_chart(fig13, use_container_width=True)
+    st.plotly_chart(fig13, width="stretch")
 
 
 # SEÇÃO DE MACHINE LEARNING - PREVISÃO DE CRITICIDADE
@@ -520,7 +520,7 @@ else:
                 options=sorted(df_n["capitulo_nc"].dropna().unique().tolist()),
             )
 
-        submit = st.form_submit_button("Prever Criticidade", use_container_width=True)
+        submit = st.form_submit_button("Prever Criticidade", width="stretch")
 
     if submit:
         try:
@@ -600,7 +600,7 @@ else:
                 showlegend=False,
                 coloraxis_showscale=False,
             )
-            st.plotly_chart(fig_pred, use_container_width=True)
+            st.plotly_chart(fig_pred, width="stretch")
 
             st.caption(
                 "Esta previsão é baseada em padrões estatísticos históricos e "
