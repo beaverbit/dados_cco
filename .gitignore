@@ -1,0 +1,36 @@
+# Ambientes virtuais
+venv/
+env/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+
+# Dados sensíveis da empresa (não versionar)
+dados_brutos/
+dados_tratados/
+
+# Modelo treinado (grande e regenerável)
+modelo/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Notebooks
+.ipynb_checkpoints/
