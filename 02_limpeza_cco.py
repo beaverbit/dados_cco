@@ -26,11 +26,11 @@ def normalizar(s):
 
 def classificar_arquivo(nome):
     n = nome.lower()
-    if "registro" in n or "analise" in n:
+    if n.startswith("analise__"):
         return "analise"
-    if "conformidade" in n:
+    if n.startswith("nc__"):
         return "nc"
-    if "parametro" in n:
+    if n.startswith("parametro__"):
         return "parametro"
     return "desconhecido"
 

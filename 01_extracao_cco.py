@@ -20,6 +20,18 @@ def sanitizar(nome):
     return n.strip("_")
 
 
+def normalizar(s):
+    s = str(s).strip().lower()
+    for a, b in [("ç", "c"), ("ã", "a"), ("á", "a"), ("à", "a"),
+                 ("é", "e"), ("ê", "e"), ("í", "i"),
+                 ("ó", "o"), ("ô", "o"), ("ú", "u")]:
+        s = s.replace(a, b)
+    s = s.replace(" ", "_").replace("%", "pct").replace("-", "_")
+    while "__" in s:
+        s = s.replace("__", "_")
+    return s.strip("_")
+
+
 def detectar_header_em_lista(linhas, min_celulas=4, max_busca=15):
     limite = min(max_busca, len(linhas))
     for i in range(limite):
@@ -32,6 +44,29 @@ def detectar_header_em_lista(linhas, min_celulas=4, max_busca=15):
                 if prox_preenchidas >= min_celulas:
                     return i
     return 0
+
+
+def classificar_por_conteudo(df):
+    """Classifica o DataFrame pelo nome das colunas, não pelo nome do arquivo."""
+    if df is None or df.shape[1] < 2:
+        return "desconhecido"
+
+    colunas_norm = [normalizar(c) for c in df.columns]
+
+    # Análise: tem ID Checklist ou Data da Avaliação
+    if "id_checklist" in colunas_norm or "data_da_avaliacao" in colunas_norm:
+        return "analise"
+
+    # NC: tem Pergunta + Gravidade
+    if "pergunta" in colunas_norm and "gravidade" in colunas_norm:
+        return "nc"
+
+    # Parâmetros: heurística — colunas conhecidas da aba de parâmetros
+    if any(c in colunas_norm for c in ["analistas", "filiais", "gravidade"]):
+        if "criticidade" in colunas_norm or "classificacao_nc" in colunas_norm:
+            return "parametro"
+
+    return "desconhecido"
 
 
 def ler_csv(arquivo):
@@ -66,7 +101,7 @@ def ler_csv(arquivo):
         for i, c in enumerate(melhor.iloc[idx])
     ]
     df = df.dropna(how="all").reset_index(drop=True)
-    return df, sep, enc
+    return df
 
 
 def ler_excel(arquivo):
@@ -119,19 +154,23 @@ def processar():
         if ext in (".xlsx", ".xls"):
             abas = ler_excel(arquivo)
             for nome_aba, df in abas:
-                destino = os.path.join(PASTA_SAIDA, f"{base}__{sanitizar(nome_aba)}.csv")
+                tipo = classificar_por_conteudo(df)
+                destino = os.path.join(
+                    PASTA_SAIDA,
+                    f"{tipo}__{sanitizar(nome_aba)}.csv",
+                )
                 df.to_csv(destino, index=False, sep=";", encoding="utf-8")
-                print(f"  -> aba '{nome_aba}': {df.shape[0]} linhas, {df.shape[1]} colunas -> {destino}")
+                print(f"  -> aba '{nome_aba}' [{tipo}]: {df.shape[0]} linhas, {df.shape[1]} colunas -> {destino}")
                 total += 1
         else:
-            resultado = ler_csv(arquivo)
-            if resultado is None:
+            df = ler_csv(arquivo)
+            if df is None:
                 print("  -> não consegui ler")
                 continue
-            df, sep, enc = resultado
-            destino = os.path.join(PASTA_SAIDA, f"{base}.csv")
+            tipo = classificar_por_conteudo(df)
+            destino = os.path.join(PASTA_SAIDA, f"{tipo}__{base}.csv")
             df.to_csv(destino, index=False, sep=";", encoding="utf-8")
-            print(f"  -> {df.shape[0]} linhas, {df.shape[1]} colunas (sep='{sep}', enc={enc}) -> {destino}")
+            print(f"  -> [{tipo}] {df.shape[0]} linhas, {df.shape[1]} colunas -> {destino}")
             total += 1
 
     print(f"\nTotal de arquivos/abas salvos em '{PASTA_SAIDA}/': {total}")
