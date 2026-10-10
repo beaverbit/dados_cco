@@ -237,6 +237,11 @@ Tempo total: **menos de 1 minuto**, contando a exportação.
 
 ---
 
-## Dúvidas
+## Registro de problemas
 
-Se algo der errado ou o comportamento não for o esperado, guarda o print da tela e me manda. O pipeline foi feito pra ser robusto, mas se aparecer um caso novo, abra uma issue que eu resolvo.
+Se o comportamento não for o esperado:
+
+1. Salve o print da tela e a saída completa do terminal
+2. Identifique qual script falhou (`01` a `06`)
+3. Abra o script correspondente e confira o trecho que processa o dado em questão
+4. Se for um caso novo (coluna com nome diferente, tipo de dado novo), ajuste o mapeamento no `02_limpeza_cco.py` e registre a mudança
