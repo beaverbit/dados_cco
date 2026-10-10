@@ -266,7 +266,7 @@ fig1.update_layout(
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
 aplicar_tema(fig1, 400)
-st.plotly_chart(fig1, use_container_width=True, theme=None)
+st.plotly_chart(fig1, width="stretch", theme=None)
 
 
 st.subheader("Taxa de Conformidade por Filial")
@@ -289,7 +289,7 @@ fig2 = px.bar(
 fig2.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
 fig2.update_layout(coloraxis_showscale=False)
 aplicar_tema(fig2, 400)
-st.plotly_chart(fig2, use_container_width=True, theme=None)
+st.plotly_chart(fig2, width="stretch", theme=None)
 
 
 st.subheader("Distribuição Mensal de Análises e NCs")
@@ -315,7 +315,7 @@ fig3.update_layout(
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
 aplicar_tema(fig3, 400)
-st.plotly_chart(fig3, use_container_width=True, theme=None)
+st.plotly_chart(fig3, width="stretch", theme=None)
 
 
 st.subheader("Distribuição por Dia da Semana e Taxa de Não Conformidade")
@@ -363,7 +363,7 @@ fig4.update_layout(
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
 aplicar_tema(fig4, 400)
-st.plotly_chart(fig4, use_container_width=True, theme=None)
+st.plotly_chart(fig4, width="stretch", theme=None)
 
 
 col_c, col_d = st.columns(2)
@@ -390,7 +390,7 @@ with col_c:
     fig5.update_traces(textposition="outside")
     fig5.update_layout(showlegend=False)
     aplicar_tema(fig5, 400)
-    st.plotly_chart(fig5, use_container_width=True, theme=None)
+    st.plotly_chart(fig5, width="stretch", theme=None)
 
 with col_d:
     st.subheader("Distribuição por Classificação")
@@ -413,7 +413,7 @@ with col_d:
         hole=0.4,
     )
     aplicar_tema(fig6, 400)
-    st.plotly_chart(fig6, use_container_width=True, theme=None)
+    st.plotly_chart(fig6, width="stretch", theme=None)
 
 
 st.subheader("Top 10 Unidades com Mais NCs")
@@ -438,7 +438,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     fig7.update_traces(texttemplate="%{text:,}", textposition="outside")
     fig7.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig7, 500)
-    st.plotly_chart(fig7, use_container_width=True, theme=None)
+    st.plotly_chart(fig7, width="stretch", theme=None)
 
 
 st.subheader("NCs por Gravidade")
@@ -457,7 +457,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     fig8.update_traces(texttemplate="%{text:,}", textposition="outside")
     fig8.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig8, 400)
-    st.plotly_chart(fig8, use_container_width=True, theme=None)
+    st.plotly_chart(fig8, width="stretch", theme=None)
 
 
 st.subheader("Top 15 Códigos de NC Mais Recorrentes")
@@ -481,7 +481,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     fig9.update_traces(texttemplate="%{text:,}", textposition="outside")
     fig9.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig9, 900)
-    st.plotly_chart(fig9, use_container_width=True, theme=None)
+    st.plotly_chart(fig9, width="stretch", theme=None)
 
 
 st.subheader("NCs por Capítulo do Checklist")
@@ -502,7 +502,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     fig10.update_traces(texttemplate="%{text:,}", textposition="outside")
     fig10.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig10, 400)
-    st.plotly_chart(fig10, use_container_width=True, theme=None)
+    st.plotly_chart(fig10, width="stretch", theme=None)
 
 
 st.subheader("Filial x Gravidade")
@@ -539,7 +539,7 @@ if df_n_f is not None and len(df_n_f) > 0:
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
     aplicar_tema(fig11, 500)
-    st.plotly_chart(fig11, use_container_width=True, theme=None)
+    st.plotly_chart(fig11, width="stretch", theme=None)
 
 
 st.subheader("NCs Registradas por Dia da Semana")
@@ -567,7 +567,7 @@ if df_n_f is not None and len(df_n_f) > 0 and "dia_semana" in df_a_f.columns:
     fig12.update_traces(texttemplate="%{text:,}", textposition="outside")
     fig12.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig12, 400)
-    st.plotly_chart(fig12, use_container_width=True, theme=None)
+    st.plotly_chart(fig12, width="stretch", theme=None)
 
 
 st.subheader("Gravidade das NCs por Capítulo")
@@ -603,7 +603,7 @@ if df_n_f is not None and len(df_n_f) > 0:
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
     aplicar_tema(fig13, 400)
-    st.plotly_chart(fig13, use_container_width=True, theme=None)
+    st.plotly_chart(fig13, width="stretch", theme=None)
 
 
 st.divider()
@@ -645,7 +645,7 @@ else:
                 options=sorted(df_n["capitulo_nc"].dropna().unique().tolist()),
             )
 
-        submit = st.form_submit_button("Prever Criticidade", use_container_width=True)
+        submit = st.form_submit_button("Prever Criticidade", width="stretch")
 
     if submit:
         try:
@@ -727,7 +727,7 @@ else:
             fig_pred.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
             fig_pred.update_layout(showlegend=False, coloraxis_showscale=False)
             aplicar_tema(fig_pred, 300)
-            st.plotly_chart(fig_pred, use_container_width=True, theme=None)
+            st.plotly_chart(fig_pred, width="stretch", theme=None)
 
             st.caption(
                 "Esta previsão é baseada em padrões estatísticos históricos e "

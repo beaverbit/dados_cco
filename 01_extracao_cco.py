@@ -1,10 +1,12 @@
 # 01_extracao_cco.py
-# Meu objetivo: ler qualquer arquivo em dados_brutos/ e salvar cada aba como CSV padronizado.
+# Meu objetivo: ler todos os meses em dados_brutos/ e consolidar cada tipo
+# em um único CSV em dados_tratados/brutos/.
 
 import pandas as pd
 import os
 import glob
 import unicodedata
+import re
 
 PASTA_BRUTOS = "dados_brutos"
 PASTA_SAIDA = os.path.join("dados_tratados", "brutos")
@@ -53,15 +55,12 @@ def classificar_por_conteudo(df):
 
     colunas_norm = [normalizar(c) for c in df.columns]
 
-    # Análise: tem ID Checklist ou Data da Avaliação
     if "id_checklist" in colunas_norm or "data_da_avaliacao" in colunas_norm:
         return "analise"
 
-    # NC: tem Pergunta + Gravidade
     if "pergunta" in colunas_norm and "gravidade" in colunas_norm:
         return "nc"
 
-    # Parâmetros: heurística — colunas conhecidas da aba de parâmetros
     if any(c in colunas_norm for c in ["analistas", "filiais", "gravidade"]):
         if "criticidade" in colunas_norm or "classificacao_nc" in colunas_norm:
             return "parametro"
@@ -128,13 +127,47 @@ def ler_excel(arquivo):
 
 
 def varrer_arquivos():
+    """Varre dados_brutos/ recursivamente, retornando (arquivo, mes_referencia)."""
     arquivos = []
+
+    # 1. Arquivos soltos na raiz (modo antigo, mes_referencia = "sem_mes")
     for ext in EXTENSOES:
-        arquivos.extend(glob.glob(os.path.join(PASTA_BRUTOS, ext)))
-    return sorted(set(arquivos))
+        for arq in glob.glob(os.path.join(PASTA_BRUTOS, ext)):
+            arquivos.append((arq, "sem_mes"))
+
+    # 2. Arquivos em subpastas (modo novo, subpasta = mes_referencia)
+    for item in sorted(os.listdir(PASTA_BRUTOS)):
+        caminho = os.path.join(PASTA_BRUTOS, item)
+        if not os.path.isdir(caminho):
+            continue
+        for ext in EXTENSOES:
+            for arq in glob.glob(os.path.join(caminho, ext)):
+                arquivos.append((arq, item))
+
+    return arquivos
 
 
-def processar():
+def detectar_mes_referencia(df, mes_pasta):
+    """Se a pasta tem nome de mês, usa. Senão tenta extrair da data."""
+    if mes_pasta != "sem_mes":
+        return mes_pasta
+
+    colunas_norm = [normalizar(c) for c in df.columns]
+    for cand in ["data_da_avaliacao", "data"]:
+        if cand in colunas_norm:
+            col_real = df.columns[colunas_norm.index(cand)]
+            try:
+                datas = pd.to_datetime(df[col_real], errors="coerce", dayfirst=True)
+                if datas.notna().any():
+                    ano = int(datas.dt.year.mode()[0])
+                    mes = int(datas.dt.month.mode()[0])
+                    return f"{ano}-{mes:02d}"
+            except Exception:
+                pass
+    return "sem_mes"
+
+
+def consolidar_por_tipo():
     arquivos = varrer_arquivos()
     if not arquivos:
         print(f"Nada em '{PASTA_BRUTOS}/'.")
@@ -143,38 +176,53 @@ def processar():
     os.makedirs(PASTA_SAIDA, exist_ok=True)
     print(f"Encontrei {len(arquivos)} arquivo(s).\n")
 
-    total = 0
-    for arquivo in arquivos:
-        nome = os.path.basename(arquivo)
-        ext = os.path.splitext(nome)[1].lower()
-        base = sanitizar(os.path.splitext(nome)[0])
+    # Acumula por tipo
+    acumulado = {"analise": [], "nc": [], "parametro": [], "desconhecido": []}
 
-        print(f"Lendo: {nome}")
+    for arquivo, mes_pasta in arquivos:
+        nome = os.path.basename(arquivo)
+        rel = os.path.relpath(arquivo, PASTA_BRUTOS)
+        ext = os.path.splitext(nome)[1].lower()
+
+        print(f"Lendo: {rel} (mês da pasta: {mes_pasta})")
 
         if ext in (".xlsx", ".xls"):
             abas = ler_excel(arquivo)
             for nome_aba, df in abas:
                 tipo = classificar_por_conteudo(df)
-                destino = os.path.join(
-                    PASTA_SAIDA,
-                    f"{tipo}__{sanitizar(nome_aba)}.csv",
-                )
-                df.to_csv(destino, index=False, sep=";", encoding="utf-8")
-                print(f"  -> aba '{nome_aba}' [{tipo}]: {df.shape[0]} linhas, {df.shape[1]} colunas -> {destino}")
-                total += 1
+                mes_ref = detectar_mes_referencia(df, mes_pasta)
+                df = df.assign(mes_referencia=mes_ref, arquivo_origem=rel, aba_origem=nome_aba)
+                acumulado[tipo].append(df)
+                print(f"  -> aba '{nome_aba}' [{tipo}] mes={mes_ref}: "
+                      f"{df.shape[0]} linhas")
         else:
             df = ler_csv(arquivo)
             if df is None:
                 print("  -> não consegui ler")
                 continue
             tipo = classificar_por_conteudo(df)
-            destino = os.path.join(PASTA_SAIDA, f"{tipo}__{base}.csv")
-            df.to_csv(destino, index=False, sep=";", encoding="utf-8")
-            print(f"  -> [{tipo}] {df.shape[0]} linhas, {df.shape[1]} colunas -> {destino}")
-            total += 1
+            mes_ref = detectar_mes_referencia(df, mes_pasta)
+            df = df.assign(mes_referencia=mes_ref, arquivo_origem=rel, aba_origem="")
+            acumulado[tipo].append(df)
+            print(f"  -> [{tipo}] mes={mes_ref}: {df.shape[0]} linhas")
 
-    print(f"\nTotal de arquivos/abas salvos em '{PASTA_SAIDA}/': {total}")
+    print("\n" + "=" * 60)
+    print("CONSOLIDAÇÃO")
+    print("=" * 60)
+
+    for tipo, lista in acumulado.items():
+        if not lista:
+            continue
+        df_final = pd.concat(lista, ignore_index=True, sort=False)
+        destino = os.path.join(PASTA_SAIDA, f"{tipo}__consolidado.csv")
+        df_final.to_csv(destino, index=False, sep=";", encoding="utf-8")
+        print(f"  {tipo}: {df_final.shape[0]} linhas, "
+              f"{df_final.shape[1]} colunas -> {destino}")
+
+        if "mes_referencia" in df_final.columns:
+            contagem = df_final["mes_referencia"].value_counts().sort_index()
+            print(f"    Meses: {dict(contagem)}")
 
 
 if __name__ == "__main__":
-    processar()
+    consolidar_por_tipo()

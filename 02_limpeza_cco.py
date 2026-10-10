@@ -11,6 +11,14 @@ ARQ_ANALISES = os.path.join("dados_tratados", "analises_limpas.csv")
 ARQ_NCS = os.path.join("dados_tratados", "nao_conformidades_limpas.csv")
 ARQ_PARAMS = os.path.join("dados_tratados", "parametros_limpos.csv")
 
+# Limites pra validação automática
+MIN_ANALISES = 50
+MIN_NCS = 10
+MAX_NULOS_PCT = 50
+MAX_NAO_CONFORME_PCT = 90
+MAX_CRITICA_PCT = 90
+MAX_DUPLICATAS_PCT = 10
+
 
 def normalizar(s):
     s = str(s).strip().lower()
@@ -77,6 +85,9 @@ def limpar_analises(df):
         "observacoes_gerais": ["observacoes_gerais"],
         "status": ["status"],
         "nome_da_unidade": ["nome_da_unidade"],
+        "mes_referencia": ["mes_referencia"],
+        "arquivo_origem": ["arquivo_origem"],
+        "aba_origem": ["aba_origem"],
     }
 
     rename = {}
@@ -143,6 +154,9 @@ def limpar_ncs(df):
         "filial": ["filial"],
         "analista": ["analista"],
         "criticidade": ["criticidade"],
+        "mes_referencia": ["mes_referencia"],
+        "arquivo_origem": ["arquivo_origem"],
+        "aba_origem": ["aba_origem"],
     }
 
     rename = {}
@@ -201,9 +215,92 @@ def limpar_parametros(df):
     return df
 
 
+def validar_analises(df):
+    """Retorna lista de avisos sobre a qualidade dos dados de análises."""
+    avisos = []
+
+    if len(df) < MIN_ANALISES:
+        avisos.append(
+            f"[ANÁLISES] Apenas {len(df)} linhas. Esperado pelo menos {MIN_ANALISES}. "
+            f"Confira se os CSVs estão em dados_brutos/<mes>/."
+        )
+
+    for col in ["id_analise", "filial", "resultado"]:
+        if col in df.columns:
+            pct_nulos = df[col].isna().mean() * 100
+            pct_vazios = (df[col].astype(str).str.strip() == "").mean() * 100
+            pct_total = max(pct_nulos, pct_vazios)
+            if pct_total > MAX_NULOS_PCT:
+                avisos.append(
+                    f"[ANÁLISES] Coluna '{col}' com {pct_total:.1f}% de valores vazios."
+                )
+
+    if "resultado" in df.columns:
+        total = len(df)
+        if total > 0:
+            pct_nc = (df["resultado"].str.lower() == "não conforme").mean() * 100
+            if pct_nc > MAX_NAO_CONFORME_PCT:
+                avisos.append(
+                    f"[ANÁLISES] {pct_nc:.1f}% das análises estão como 'Não Conforme'. "
+                    f"Isso pode indicar erro na planilha de origem."
+                )
+
+    return avisos
+
+
+def validar_ncs(df):
+    """Retorna lista de avisos sobre a qualidade dos dados de NCs."""
+    avisos = []
+
+    if len(df) < MIN_NCS:
+        avisos.append(
+            f"[NCs] Apenas {len(df)} linhas. Esperado pelo menos {MIN_NCS}. "
+            f"Confira se os CSVs estão em dados_brutos/<mes>/."
+        )
+
+    if "gravidade" in df.columns and len(df) > 0:
+        pct_critica = (df["gravidade"].str.lower() == "crítica").mean() * 100
+        if pct_critica > MAX_CRITICA_PCT:
+            avisos.append(
+                f"[NCs] {pct_critica:.1f}% das NCs estão como 'Crítica'. "
+                f"Isso pode indicar que a fórmula de gravidade na planilha "
+                f"não está calculando direito."
+            )
+
+    if "codigo_nc" in df.columns and len(df) > 0:
+        duplicatas = df.duplicated(subset=["id_analise", "codigo_nc"]).mean() * 100
+        if duplicatas > MAX_DUPLICATAS_PCT:
+            avisos.append(
+                f"[NCs] {duplicatas:.1f}% de linhas duplicadas (mesma análise + "
+                f"mesmo código). Confira se a planilha não tem linhas repetidas."
+            )
+
+    return avisos
+
+
+def imprimir_avisos(avisos):
+    if not avisos:
+        print("\n" + "=" * 60)
+        print("VALIDAÇÃO: OK — nenhum problema detectado.")
+        print("=" * 60)
+        return
+
+    print("\n" + "=" * 60)
+    print(f"VALIDAÇÃO: {len(avisos)} aviso(s) encontrado(s)")
+    print("=" * 60)
+    for a in avisos:
+        print(f"  ⚠  {a}")
+    print()
+    print("  O pipeline continua, mas confira esses pontos antes de")
+    print("  apresentar o dashboard para alguém.")
+    print("=" * 60)
+
+
 def main():
     print("Lendo arquivos de:", PASTA_BRUTOS)
     os.makedirs("dados_tratados", exist_ok=True)
+
+    avisos = []
 
     print("\nAnálises:")
     df_a = carregar_por_tipo("analise")
@@ -211,6 +308,7 @@ def main():
         df_a = limpar_analises(df_a)
         df_a.to_csv(ARQ_ANALISES, index=False, sep=";", encoding="utf-8")
         print(f"Salvei: {ARQ_ANALISES}")
+        avisos += validar_analises(df_a)
 
     print("\nNão Conformidades:")
     df_n = carregar_por_tipo("nc")
@@ -218,6 +316,7 @@ def main():
         df_n = limpar_ncs(df_n)
         df_n.to_csv(ARQ_NCS, index=False, sep=";", encoding="utf-8")
         print(f"Salvei: {ARQ_NCS}")
+        avisos += validar_ncs(df_n)
 
     print("\nParâmetros:")
     df_p = carregar_por_tipo("parametro")
@@ -225,6 +324,8 @@ def main():
         df_p = limpar_parametros(df_p)
         df_p.to_csv(ARQ_PARAMS, index=False, sep=";", encoding="utf-8")
         print(f"Salvei: {ARQ_PARAMS}")
+
+    imprimir_avisos(avisos)
 
     print("\nLimpeza concluída.")
 
