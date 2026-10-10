@@ -17,6 +17,7 @@ MIN_NCS = 10
 MAX_NULOS_PCT = 50
 MAX_NAO_CONFORME_PCT = 90
 MAX_CRITICA_PCT = 99
+MAX_DUPLICATAS_PCT = 10
 
 def normalizar(s):
     s = str(s).strip().lower()
