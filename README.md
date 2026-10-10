@@ -214,10 +214,9 @@ Uma linha da aba "Não Conformidades" pode conter várias NCs separadas por `/` 
 
 ## Próximos Passos
 
-- [ ] Validar a fórmula de gravidade na planilha original
-- [ ] Coletar mais meses de dados para o modelo de ML
-- [ ] Configurar alertas automáticos para filiais com taxa de NC acima da meta
-- [ ] Versionar o projeto no GitHub
+- [ ] Coletar mais meses de dados para o modelo de ML (previsto para dez/2026)
+- [ ] Levar o achado do Item 1.1 (153 NCs em foto de executante) para a gestão — indica necessidade de orientação sobre uso do CF
+- [ ] Avaliar notificações automáticas caso o volume de dados justifique
 
 ---
 
