@@ -416,7 +416,7 @@ with col_d:
     st.plotly_chart(fig6, width="stretch", theme=None)
 
 
-st.subheader("Top 10 Unidades com Mais NCs")
+st.subheader("Unidades com Maior Incidência de NCs")
 
 if df_n_f is not None and len(df_n_f) > 0:
     resumo_unidade = df_n_f.groupby("codigo_unidade").agg(
@@ -460,7 +460,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     st.plotly_chart(fig8, width="stretch", theme=None)
 
 
-st.subheader("Top 15 Códigos de NC Mais Recorrentes")
+st.subheader("Itens do Checklist com Maior Reincidência")
 
 if df_n_f is not None and len(df_n_f) > 0:
     resumo_cod = df_n_f.groupby("codigo_nc").agg(
@@ -607,7 +607,7 @@ if df_n_f is not None and len(df_n_f) > 0:
 
 
 st.divider()
-st.header("Previsão de Criticidade com Machine Learning")
+st.header("Previsão de Criticidade")
 st.markdown(
     """
     Utilize o formulário abaixo para simular as condições de uma não conformidade.
@@ -740,5 +740,5 @@ else:
 
 st.divider()
 st.caption(
-    "Dashboard de indicadores operacionais do CCO."
+    "Desenvolvido por Jhonatan L. Santos para Terceirize Mais / Costa Oeste © 2026. Todos os direitos reservados."
 )
