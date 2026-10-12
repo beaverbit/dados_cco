@@ -18,7 +18,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ESTILO VISUAL (dark profissional, sem neon)
+# ESTILO VISUAL (identidade Terceirize Mais)
 st.markdown("""
 <style>
     .stApp {
@@ -35,7 +35,7 @@ st.markdown("""
     }
 
     h1 {
-        color: #F0F6FC !important;
+        color: #4ADE80 !important;
         font-weight: 700 !important;
         letter-spacing: -0.5px !important;
     }
@@ -48,7 +48,7 @@ st.markdown("""
 
     [data-testid="stMetric"] {
         background: #161B22;
-        border-left: 4px solid #388BFD;
+        border-left: 4px solid #2E7D32;
         border-radius: 6px;
         padding: 16px 20px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -77,7 +77,7 @@ st.markdown("""
     }
 
     .stButton > button {
-        background: #238636;
+        background: #2E7D32;
         color: #FFFFFF;
         border: none;
         font-weight: 600;
@@ -86,7 +86,7 @@ st.markdown("""
         transition: background 0.15s;
     }
     .stButton > button:hover {
-        background: #2EA043;
+        background: #1B5E20;
         color: #FFFFFF;
     }
 
@@ -109,13 +109,13 @@ st.markdown("""
 
     .stAlert {
         background: #161B22 !important;
-        border-left: 4px solid #D29922 !important;
+        border-left: 4px solid #F9A825 !important;
         color: #C9D1D9 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-TEMPLATE = "plotly_dark"
+TEMPLATE = "plotly_white"
 
 ARQ_ANALISES = os.path.join("dados_tratados", "analises_limpas.csv")
 ARQ_NCS = os.path.join("dados_tratados", "nao_conformidades_limpas.csv")
@@ -169,9 +169,9 @@ modelo, encoders = carregar_modelo()
 st.title("CCO - Indicadores Operacionais")
 st.markdown(
     f"""
-    <div style="color:#8B949E; font-size:0.95rem; margin-bottom:1rem;">
-        <b style="color:#C9D1D9;">Análises:</b> {len(df_a):,} &nbsp;&nbsp;|&nbsp;&nbsp;
-        <b style="color:#C9D1D9;">Não conformidades:</b> {len(df_n) if df_n is not None else 0:,}
+    <div style="color:#607D8B; font-size:0.95rem; margin-bottom:1rem;">
+        <b style="color:#37474F;">Análises:</b> {len(df_a):,} &nbsp;&nbsp;|&nbsp;&nbsp;
+        <b style="color:#37474F;">Não conformidades:</b> {len(df_n) if df_n is not None else 0:,}
     </div>
     """,
     unsafe_allow_html=True,
@@ -214,8 +214,8 @@ if df_n is not None:
     df_n_f = df_n[df_n["id_analise"].isin(df_a_f["id_analise"])].copy()
 
 st.sidebar.markdown(
-    f"<div style='color:#8B949E; margin-top:1rem;'>Análises filtradas: "
-    f"<b style='color:#C9D1D9;'>{len(df_a_f):,}</b></div>",
+    f"<div style='color:#607D8B; margin-top:1rem;'>Análises filtradas: "
+    f"<b style='color:#37474F;'>{len(df_a_f):,}</b></div>",
     unsafe_allow_html=True,
 )
 
@@ -247,7 +247,7 @@ fig1.add_trace(go.Bar(
     x=resumo_filial["filial"],
     y=resumo_filial["total"],
     name="Total de análises",
-    marker_color="#388BFD",
+    marker_color="#2E7D32",
     yaxis="y1",
 ))
 fig1.add_trace(go.Scatter(
@@ -255,7 +255,7 @@ fig1.add_trace(go.Scatter(
     y=resumo_filial["nc"],
     name="Total de NCs",
     mode="lines+markers",
-    marker=dict(color="#F85149", size=10),
+    marker=dict(color="#C62828", size=10),
     line=dict(width=3),
     yaxis="y2",
 ))
@@ -302,11 +302,11 @@ resumo_mes = df_a_f.groupby("mes").agg(
 fig3 = go.Figure()
 fig3.add_trace(go.Bar(
     x=resumo_mes["mes"], y=resumo_mes["total"],
-    name="Análises", marker_color="#388BFD",
+    name="Análises", marker_color="#2E7D32",
 ))
 fig3.add_trace(go.Bar(
     x=resumo_mes["mes"], y=resumo_mes["nc"],
-    name="NCs", marker_color="#F85149",
+    name="NCs", marker_color="#C62828",
 ))
 fig3.update_layout(
     barmode="group",
@@ -344,7 +344,7 @@ fig4.add_trace(go.Bar(
     x=resumo_dia["dia_semana_pt"],
     y=resumo_dia["total"],
     name="Total de análises",
-    marker_color="#388BFD",
+    marker_color="#2E7D32",
     yaxis="y1",
 ))
 fig4.add_trace(go.Scatter(
@@ -352,7 +352,7 @@ fig4.add_trace(go.Scatter(
     y=resumo_dia["taxa_nc"],
     name="Taxa de NC (%)",
     mode="lines+markers",
-    marker=dict(color="#F85149", size=8),
+    marker=dict(color="#C62828", size=8),
     line=dict(width=3),
     yaxis="y2",
 ))
@@ -375,9 +375,9 @@ with col_c:
     ).reset_index()
 
     cores_resultado = {
-        "Conforme": "#3FB950",
-        "Conforme com Observação": "#D29922",
-        "Não Conforme": "#F85149",
+        "Conforme": "#2E7D32",
+        "Conforme com Observação": "#F9A825",
+        "Não Conforme": "#C62828",
     }
 
     fig5 = px.bar(
@@ -398,11 +398,11 @@ with col_d:
 
     ordem_class = ["Ótimo", "Bom", "Regular", "Ruim", "Péssimo"]
     cores_class = {
-        "Ótimo": "#3FB950",
-        "Bom": "#388BFD",
-        "Regular": "#D29922",
-        "Ruim": "#F0883E",
-        "Péssimo": "#F85149",
+        "Ótimo": "#2E7D32",
+        "Bom": "#66BB6A",
+        "Regular": "#F9A825",
+        "Ruim": "#EF6C00",
+        "Péssimo": "#C62828",
     }
 
     fig6 = px.pie(
@@ -495,7 +495,7 @@ if df_n_f is not None and len(df_n_f) > 0:
 
     fig10 = px.bar(
         resumo_cap, x="capitulo_nc", y="total",
-        color="total", color_continuous_scale="Blues_r",
+        color="total", color_continuous_scale="Greens",
         labels={"capitulo_nc": "Capítulo", "total": "NCs"},
         text="total",
     )
@@ -522,10 +522,10 @@ if df_n_f is not None and len(df_n_f) > 0:
 
     fig11 = go.Figure()
     cores_grav = {
-        "Baixa": "#3FB950",
-        "Média": "#D29922",
-        "Alta": "#F0883E",
-        "Crítica": "#F85149",
+        "Baixa": "#2E7D32",
+        "Média": "#F9A825",
+        "Alta": "#EF6C00",
+        "Crítica": "#C62828",
     }
     for g in ordem_grav:
         fig11.add_trace(go.Bar(
@@ -586,10 +586,10 @@ if df_n_f is not None and len(df_n_f) > 0:
 
     fig13 = go.Figure()
     cores_grav = {
-        "Baixa": "#3FB950",
-        "Média": "#D29922",
-        "Alta": "#F0883E",
-        "Crítica": "#F85149",
+        "Baixa": "#2E7D32",
+        "Média": "#F9A825",
+        "Alta": "#EF6C00",
+        "Crítica": "#C62828",
     }
     for g in ordem_grav:
         fig13.add_trace(go.Bar(
@@ -680,22 +680,22 @@ else:
             st.markdown("### Resultado da Previsão")
 
             cores = {
-                "Crítica": "#F85149",
-                "Outra": "#3FB950",
+                "Crítica": "#C62828",
+                "Outra": "#2E7D32",
             }
 
-            cor = cores.get(classe_prevista, "#8B949E")
+            cor = cores.get(classe_prevista, "#607D8B")
 
             st.markdown(
                 f"""
                 <div style="
-                    background-color: #161B22;
+                    background-color: #ECEFF1;
                     border-left: 6px solid {cor};
                     padding: 20px;
                     border-radius: 6px;
                     margin: 10px 0;
                 ">
-                    <div style="color: #8B949E; font-size: 0.85rem;
+                    <div style="color: #607D8B; font-size: 0.85rem;
                                 text-transform: uppercase; letter-spacing: 0.5px;
                                 margin-bottom: 4px;">
                         Classificação prevista
