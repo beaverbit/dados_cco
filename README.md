@@ -20,20 +20,20 @@ Pipeline de Ciência de Dados aplicado aos dados operacionais do CCO (Centro de 
 
 ```
 dados_cco/
-├── 01_extracao_cco.py          ← corrigido + testado
+├── 01_extracao_cco.py       
 ├── 02_limpeza_cco.py
 ├── 03_analise_cco.py
 ├── 04_visualizacao_cco.py
 ├── 05_dashboard_cco.py
 ├── 06_machine_learning_cco.py
-├── run_all.py                  ← roda tudo em ~27s
-├── tests/                      ← 24 testes
+├── run_all.py                 
+├── tests/                     
 │   ├── conftest.py
 │   ├── test_extracao.py
 │   ├── test_limpeza.py
 │   └── test_analise.py
 ├── pytest.ini
-├── requirements.txt            ← com pytest
+├── requirements.txt          
 ├── README.md
 ├── PROCESSO.md
 └── .gitignore
