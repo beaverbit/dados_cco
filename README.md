@@ -190,6 +190,7 @@ Criticidade texto Criticidade atribuída
 
 ## KPIs Gerados (script 03)
 
+```
 - 1. Visão geral — total de análises, conformes, NCs, taxa de conformidade, nota média
 - 2. Desempenho por filial — taxa de NC por filial
 - 3. Top 15 unidades com mais NCs
@@ -203,6 +204,7 @@ Criticidade texto Criticidade atribuída
 - 11. NCs por filial
 - 12. Filial x Gravidade (cruzamento)
 - 13. NCs registradas por analista
+```
 
 Resultados salvos em dados_tratados/resultados_analise_cco.csv.
 
