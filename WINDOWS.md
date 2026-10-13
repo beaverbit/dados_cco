@@ -70,7 +70,7 @@ Confirme com `S` ou `Y`. Isso libera scripts só pra sua conta, sem precisar de 
 Você deve ver `(venv)` no começo da linha:
 
 ```
-(venv) PS C:\Users\jhonatan.santos\dados_cco>
+(venv) PS C:\Users\<seu-usuario>\dados_cco>
 ```
 
 ### 1.6. Instalar as dependências
@@ -133,7 +133,7 @@ dados_brutos\
 **Exemplo prático:** para adicionar outubro de 2026:
 
 ```powershell
-cd C:\Users\jhonatan.santos\dados_cco
+cd C:\Users\<seu-usuario>\dados_cco
 mkdir dados_brutos\2026-10
 # Copie os dois CSVs baixados pra dentro dessa pasta
 ```
@@ -147,7 +147,7 @@ mkdir dados_brutos\2026-10
 Abra o PowerShell e vá até a raiz do projeto:
 
 ```powershell
-cd C:\Users\jhonatan.santos\dados_cco
+cd C:\Users\<seu-usuario>\dados_cco
 ```
 
 Ative o ambiente virtual:
