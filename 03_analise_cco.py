@@ -37,9 +37,10 @@ def kpi_geral(df_a):
     print("=" * 60)
 
     total = len(df_a)
-    conformes = (df_a["resultado"].str.lower() == "conforme").sum()
-    conforme_obs = (df_a["resultado"].str.lower() == "conforme com observação").sum()
-    nao_conformes = (df_a["resultado"].str.lower() == "não conforme").sum()
+    resultado_lower = df_a["resultado"].astype(str).str.lower()
+    conformes = (resultado_lower == "conforme").sum()
+    conforme_obs = (resultado_lower == "conforme com observação").sum()
+    nao_conformes = (resultado_lower == "não conforme").sum()
 
     resumo = pd.DataFrame([{
         "total_analises": total,
@@ -48,7 +49,7 @@ def kpi_geral(df_a):
         "nao_conformes": nao_conformes,
         "taxa_conformidade_pct": round(conformes / total * 100, 2) if total else 0,
         "taxa_nao_conformidade_pct": round(nao_conformes / total * 100, 2) if total else 0,
-        "media_nota_pct": round(df_a["pct_nota"].mean(), 2) if "pct_nota" in df_a else None,
+        "media_nota_pct": round(df_a["pct_nota"].mean(), 2) if "pct_nota" in df_a and len(df_a) > 0 else None,
         "total_nc": int(df_a["qtd_nc"].sum()) if "qtd_nc" in df_a else None,
     }])
     print(resumo.to_string(index=False))
@@ -66,8 +67,8 @@ def kpi_por_filial(df_a):
         total_nc=("qtd_nc", "sum"),
     ).reset_index()
 
-    nao_conf = df_a[df_a["resultado"].str.lower() == "não conforme"] \
-        .groupby("filial").size()
+    nao_conf = df_a[df_a["resultado"].astype(str).str.lower() == "não conforme"] \
+    .groupby("filial").size()
     resumo = resumo.assign(
         nao_conformes=resumo["filial"].map(nao_conf).fillna(0).astype(int)
     )

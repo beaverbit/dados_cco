@@ -60,3 +60,34 @@ def pasta_temporaria():
     """Cria uma pasta temporária e limpa depois."""
     with tempfile.TemporaryDirectory() as tmpdir:
         yield tmpdir
+
+
+@pytest.fixture
+def df_analises_vazio():
+    """DataFrame de análises sem dados — pra testar casos limite."""
+    return pd.DataFrame({
+        "id_analise": [],
+        "filial": [],
+        "analista": [],
+        "resultado": [],
+        "classificacao": [],
+        "pct_nota": [],
+        "qtd_nc": [],
+        "status": [],
+        "nome_da_unidade": [],
+    })
+
+
+@pytest.fixture
+def df_ncs_vazio():
+    """DataFrame de NCs sem dados — pra testar casos limite."""
+    return pd.DataFrame({
+        "id_analise": [],
+        "codigo_nc": [],
+        "capitulo_nc": [],
+        "classificacao": [],
+        "gravidade": [],
+        "codigo_unidade": [],
+        "filial": [],
+        "analista": [],
+    })
