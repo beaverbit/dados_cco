@@ -20,24 +20,23 @@ Pipeline de Ciência de Dados aplicado aos dados operacionais do CCO (Centro de 
 
 ```
 dados_cco/
-│
-├── dados_brutos/              # CSVs originais exportados do Google Sheets (não versionados)
-├── dados_tratados/            # Dados limpos e resultados intermediários (não versionados)
-├── imagens/                   # Gráficos estáticos gerados (versionados)
-├── modelo/                    # Modelo ML treinado (não versionado — gerado pelo script 06)
-│
-├── 01_extracao_cco.py         # Leitura e consolidação dos CSVs brutos
-├── 02_limpeza_cco.py          # Limpeza, explode de NCs e padronização
-├── 03_analise_cco.py          # Análises estatísticas descritivas (13 KPIs)
-├── 04_visualizacao_cco.py     # Geração dos 8 gráficos estáticos (Plotly + kaleido)
-├── 05_dashboard_cco.py        # Dashboard interativo (Streamlit)
-├── 06_machine_learning_cco.py # Treinamento do modelo Random Forest
-│
-├── run_all.py                 # Executa o pipeline todo em ordem
-├── requirements.txt
-├── .gitignore
-├── LICENSE
-└── README.md
+├── 01_extracao_cco.py          ← corrigido + testado
+├── 02_limpeza_cco.py
+├── 03_analise_cco.py
+├── 04_visualizacao_cco.py
+├── 05_dashboard_cco.py
+├── 06_machine_learning_cco.py
+├── run_all.py                  ← roda tudo em ~27s
+├── tests/                      ← 24 testes
+│   ├── conftest.py
+│   ├── test_extracao.py
+│   ├── test_limpeza.py
+│   └── test_analise.py
+├── pytest.ini
+├── requirements.txt            ← com pytest
+├── README.md
+├── PROCESSO.md
+└── .gitignore
 ```
 
 ---
