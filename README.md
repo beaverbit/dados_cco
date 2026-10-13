@@ -182,17 +182,17 @@ O modelo de ML foi desenvolvido como experimento pessoal, não como parte do esc
 
 ### Por que ainda não é confiável:
 
-· A classe "Crítica" representa 96,88% das amostras (217 de 224 NCs)
-· Um classificador trivial que sempre prevê "Crítica" já acertaria 96,88%
-· A classe "Outra" tem apenas 7 amostras no dataset atual
-· Com esse desbalanceamento, não há padrão estatístico que o modelo possa aprender
+- A classe "Crítica" representa 96,88% das amostras (217 de 224 NCs)
+- Um classificador trivial que sempre prevê "Crítica" já acertaria 96,88%
+- A classe "Outra" tem apenas 7 amostras no dataset atual
+- Com esse desbalanceamento, não há padrão estatístico que o modelo possa aprender
 
 ### O que o modelo faz:
 
-· Alvo: prever se uma NC é Crítica ou Outra
-· Features: filial, classificação, código da unidade, capítulo do checklist
-· Algoritmo: Random Forest
-· Arquivos gerados: modelo/modelo_cco.pkl, modelo/encoders_cco.pkl
+- Alvo: prever se uma NC é Crítica ou Outra
+- Features: filial, classificação, código da unidade, capítulo do checklist
+- Algoritmo: Random Forest
+- Arquivos gerados: modelo/modelo_cco.pkl, modelo/encoders_cco.pkl
 
 ### Quando fará sentido usar:
 
