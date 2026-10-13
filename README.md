@@ -272,24 +272,6 @@ Uma linha da aba "Não Conformidades" pode conter várias NCs separadas por / (e
 
 ---
 
-## Limitações Conhecidas
-
-- Volume de dados: o dataset atual cobre 4 meses (~570 análises). Os KPIs são representativos, mas o ML ainda não tem base suficiente.
-- Dados de agosto incompletos: o mês tem apenas 2 análises — é o mês de validação de métricas do CCO, então o volume baixo é esperado.
-- Gravidade concentrada em Crítica: 217 de 224 NCs estão como Crítica. Isso é regra de negócio do CF (toda NC no checklist é crítica por definição), não bug.
-- Machine Learning experimental: o modelo está no repositório como demonstração, não como ferramenta operacional.
-
----
-
-## Próximos Passos
-
-- ☐ Coletar mais meses de dados para o modelo de ML (previsto para dez/2026)
-- ☐ Levar o achado do Item 1.1 (153 NCs em foto de executante) para a gestão — indica necessidade de orientação sobre uso do CF
-- ☐ Avaliar notificações automáticas caso o volume de dados justifique
-- ☐ Adicionar CI/CD (GitHub Actions) para rodar pytest a cada push
-
----
-
 ## Referências
 
 · PEDREGOSA, F. et al. Scikit-learn: Machine Learning in Python. JMLR, 2011.
