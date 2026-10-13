@@ -35,15 +35,19 @@ def normalizar(s):
 
 
 def detectar_header_em_lista(linhas, min_celulas=4, max_busca=15):
+    """Acha a primeira linha com >= min_celulas preenchidas seguidas por uma linha com dados."""
+    def contar_preenchidas(row):
+        return sum(
+            1 for c in row
+            if c is not None
+            and str(c).strip() not in ("", "nan", "None")
+        )
+
     limite = min(max_busca, len(linhas))
     for i in range(limite):
-        row = linhas[i]
-        preenchidas = sum(1 for c in row if str(c).strip() not in ("", "nan"))
-        if preenchidas >= min_celulas:
+        if contar_preenchidas(linhas[i]) >= min_celulas:
             if i + 1 < len(linhas):
-                prox = linhas[i + 1]
-                prox_preenchidas = sum(1 for c in prox if str(c).strip() not in ("", "nan"))
-                if prox_preenchidas >= min_celulas:
+                if contar_preenchidas(linhas[i + 1]) >= min_celulas:
                     return i
     return 0
 
