@@ -154,40 +154,6 @@ Acesse http://localhost:8501 no navegador.
 
 ---
 
-## Estrutura dos Dados
-
-### Aba "Registro das Análises"
-
-Coluna Tipo Descrição
-ID da Análise texto Identificador único (ex: J-0001)
-ID Checklist número ID do checklist no sistema
-Analista texto Nome do analista responsável
-Filial texto Filial (Curitiba, Santa Catarina, etc.)
-Data da Avaliação data Data da análise
-Resultado texto Conforme / Conforme com Observação / Não Conforme
-Classificação texto Ótimo / Bom / Regular / Ruim / Péssimo
-% Nota número Nota em decimal (1.00 = 100%)
-Qtd NC número Quantidade de NCs identificadas
-Status texto Finalizado / Pendente / Em Análise
-Nome da Unidade texto Nome da unidade avaliada
-
-### Aba "Não Conformidades"
-
-Coluna Tipo Descrição
-ID Análise texto FK para Registro das Análises
-Pergunta texto Código da NC no checklist (ex: 3.2 / 5.3 / 6.1)
-Classificação texto Documentação / Procedimento / Limpeza / Segurança / Organização / Equipamentos / EPI / Operacional / Administrativo / Outro
-Departamento número Código da unidade (renomeado para codigo_unidade)
-Gravidade texto Baixa / Média / Alta / Crítica
-Observação texto Descrição da NC
-Filial texto Filial
-Analista texto Analista
-Criticidade texto Criticidade atribuída
-
-- Observação importante: a coluna Pergunta pode conter múltiplas NCs separadas por /. O script 02_limpeza_cco.py explode essas linhas, transformando 3.2 / 5.3 / 6.1 em 3 linhas distintas.
-
----
-
 ## KPIs Gerados (script 03)
 
 ```
@@ -274,5 +240,5 @@ Uma linha da aba "Não Conformidades" pode conter várias NCs separadas por / (e
 
 ## Referências
 
-· PEDREGOSA, F. et al. Scikit-learn: Machine Learning in Python. JMLR, 2011.
-· MCKINNEY, W. Python for Data Analysis. O'Reilly Media, 2022.
+- PEDREGOSA, F. et al. Scikit-learn: Machine Learning in Python. JMLR, 2011.
+- MCKINNEY, W. Python for Data Analysis. O'Reilly Media, 2022.
