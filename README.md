@@ -31,30 +31,29 @@ As duas são corretas, mas medem coisas diferentes. A primeira é usada nos KPIs
 ## Arquitetura do Projeto
 
 ```
-
 dados_cco/
 │
-├── 01_extracao_cco.py          # Lê e consolida CSVs de múltiplos meses
-├── 02_limpeza_cco.py           # Limpa, valida e explode NCs compostas
-├── 03_analise_cco.py           # Gera 13 KPIs operacionais
-├── 04_visualizacao_cco.py      # Gera 8 gráficos estáticos (PNG)
-├── 05_dashboard_cco.py         # Dashboard interativo (Streamlit)
-├── 06_machine_learning_cco.py  # Modelo experimental de criticidade
-├── 07_gerar_pdf_cco.py         # Gera relatório PDF dark (A4)
+├── scripts/                     # Todos os scripts executáveis
+│   ├── 01_extracao_cco.py       # Lê e consolida CSVs de múltiplos meses
+│   ├── 02_limpeza_cco.py        # Limpa, valida e explode NCs compostas
+│   ├── 03_analise_cco.py        # Gera 13 KPIs operacionais
+│   ├── 04_visualizacao_cco.py   # Gera 8 gráficos estáticos (PNG)
+│   ├── 05_dashboard_cco.py      # Dashboard interativo (Streamlit)
+│   ├── 06_machine_learning_cco.py  # Modelo experimental de criticidade
+│   └── 07_gerar_pdf_cco.py      # Gera relatório PDF dark (A4)
 │
-├── run_all.py                  # Executa 01→07 em ordem (~40-80s)
-├── tests/                      # 53 testes automatizados
+├── run_all.py                   # Executa scripts/01→07 em ordem (~40-80s)
+├── tests/                       # 53 testes automatizados
 │   ├── conftest.py
 │   ├── test_extracao.py
 │   ├── test_limpeza.py
 │   └── test_analise.py
-├── pytest.ini                  # Configuração do pytest
+├── pytest.ini
 ├── requirements.txt
 ├── README.md
-├── PROCESSO.md                 # Guia de uso pra quem vai alimentar o pipeline
-├── WINDOWS.md                  # Guia Windows (validado)
+├── PROCESSO.md
+├── WINDOWS.md
 └── .gitignore
-
 ```
 
 ---
@@ -132,18 +131,18 @@ python3 run_all.py
 Ou etapa por etapa:
 
 ```bash
-python3 01_extracao_cco.py
-python3 02_limpeza_cco.py
-python3 03_analise_cco.py
-python3 04_visualizacao_cco.py
-python3 06_machine_learning_cco.py
-python3 07_gerar_pdf_cco.py
+python3 scripts/01_extracao_cco.py
+python3 scripts/02_limpeza_cco.py
+python3 scripts/03_analise_cco.py
+python3 scripts/04_visualizacao_cco.py
+python3 scripts/06_machine_learning_cco.py
+python3 scripts/07_gerar_pdf_cco.py
 ```
 
 O `05_dashboard_cco.py` roda separado (é um servidor Streamlit, não um script batch):
 
 ```bash
-streamlit run 05_dashboard_cco.py
+streamlit run scripts/05_dashboard_cco.py
 ```
 
 ### 7. Rode os testes
@@ -157,7 +156,7 @@ Saída esperada: 53 passed in ~0.5s.
 ### 8. Abra o dashboard
 
 ```bash
-streamlit run 05_dashboard_cco.py
+streamlit run scripts/05_dashboard_cco.py
 ```
 
 Acesse http://localhost:8501 no navegador.
