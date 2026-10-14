@@ -11,6 +11,7 @@ ETAPAS = [
     ("03 - Analise",          "03_analise_cco.py"),
     ("04 - Visualizacao",     "04_visualizacao_cco.py"),
     ("06 - Machine Learning", "06_machine_learning_cco.py"),
+    ("07 - Relatorio PDF",    "07_gerar_pdf_cco.py"),
 ]
 
 
