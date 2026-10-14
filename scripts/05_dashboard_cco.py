@@ -10,6 +10,9 @@ import plotly.graph_objects as go
 import os
 import joblib
 
+# Raiz do projeto (pasta pai de scripts/)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(
     page_title="CCO - Indicadores Operacionais",
@@ -117,10 +120,10 @@ st.markdown("""
 
 TEMPLATE = "plotly_white"
 
-ARQ_ANALISES = os.path.join("dados_tratados", "analises_limpas.csv")
-ARQ_NCS = os.path.join("dados_tratados", "nao_conformidades_limpas.csv")
-ARQ_MODELO = os.path.join("modelo", "modelo_cco.pkl")
-ARQ_ENCODERS = os.path.join("modelo", "encoders_cco.pkl")
+ARQ_ANALISES = os.path.join(BASE_DIR, "dados_tratados", "analises_limpas.csv")
+ARQ_NCS = os.path.join(BASE_DIR, "dados_tratados", "nao_conformidades_limpas.csv")
+ARQ_MODELO = os.path.join(BASE_DIR, "modelo", "modelo_cco.pkl")
+ARQ_ENCODERS = os.path.join(BASE_DIR, "modelo", "encoders_cco.pkl")
 
 FEATURES = ["filial", "classificacao", "codigo_unidade", "capitulo_nc"]
 TARGET = "critica_bin"

@@ -6,10 +6,13 @@ import os
 import glob
 import re
 
+# Raiz do projeto (pasta pai de scripts/)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 PASTA_BRUTOS = os.path.join("dados_tratados", "brutos")
-ARQ_ANALISES = os.path.join("dados_tratados", "analises_limpas.csv")
-ARQ_NCS = os.path.join("dados_tratados", "nao_conformidades_limpas.csv")
-ARQ_PARAMS = os.path.join("dados_tratados", "parametros_limpos.csv")
+ARQ_ANALISES = os.path.join(BASE_DIR, "dados_tratados", "analises_limpas.csv")
+ARQ_NCS = os.path.join(BASE_DIR, "dados_tratados", "nao_conformidades_limpas.csv")
+ARQ_PARAMS = os.path.join(BASE_DIR, "dados_tratados", "parametros_limpos.csv")
 
 # Limites pra validação automática
 MIN_ANALISES = 50
@@ -297,7 +300,7 @@ def imprimir_avisos(avisos):
 
 def main():
     print("Lendo arquivos de:", PASTA_BRUTOS)
-    os.makedirs("dados_tratados", exist_ok=True)
+    os.makedirs(os.path.join(BASE_DIR, "dados_tratados"), exist_ok=True)
 
     avisos = []
 

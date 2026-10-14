@@ -6,12 +6,12 @@ import sys
 import time
 
 ETAPAS = [
-    ("01 - Extracao",         "01_extracao_cco.py"),
-    ("02 - Limpeza",          "02_limpeza_cco.py"),
-    ("03 - Analise",          "03_analise_cco.py"),
-    ("04 - Visualizacao",     "04_visualizacao_cco.py"),
-    ("06 - Machine Learning", "06_machine_learning_cco.py"),
-    ("07 - Relatorio PDF",    "07_gerar_pdf_cco.py"),
+    ("01 - Extracao",         "scripts/01_extracao_cco.py"),
+    ("02 - Limpeza",          "scripts/02_limpeza_cco.py"),
+    ("03 - Analise",          "scripts/03_analise_cco.py"),
+    ("04 - Visualizacao",     "scripts/04_visualizacao_cco.py"),
+    ("06 - Machine Learning", "scripts/06_machine_learning_cco.py"),
+    ("07 - Relatorio PDF",    "scripts/07_gerar_pdf_cco.py"),
 ]
 
 
@@ -49,7 +49,7 @@ def main():
     print("============================================================")
     print()
     print("Pra abrir o dashboard, rode separado:")
-    print("  streamlit run 05_dashboard_cco.py")
+    print("  streamlit run scripts/05_dashboard_cco.py")
 
 
 if __name__ == "__main__":

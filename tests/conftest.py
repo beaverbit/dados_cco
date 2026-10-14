@@ -8,7 +8,8 @@ import sys
 import tempfile
 
 # Adiciona a raiz do projeto no path pra importar os módulos
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(RAIZ, "scripts"))
 
 
 @pytest.fixture

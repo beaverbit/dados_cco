@@ -6,9 +6,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 
-ARQ_ANALISES = os.path.join("dados_tratados", "analises_limpas.csv")
-ARQ_NCS = os.path.join("dados_tratados", "nao_conformidades_limpas.csv")
-PASTA_IMAGENS = "imagens"
+# Raiz do projeto (pasta pai de scripts/)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+ARQ_ANALISES = os.path.join(BASE_DIR, "dados_tratados", "analises_limpas.csv")
+ARQ_NCS = os.path.join(BASE_DIR, "dados_tratados", "nao_conformidades_limpas.csv")
+PASTA_IMAGENS = os.path.join(BASE_DIR, "imagens")
 
 GRAVIDADES_ORDEM = ["Baixa", "Média", "Alta", "Crítica"]
 CORES_GRAVIDADE = {

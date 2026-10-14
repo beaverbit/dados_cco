@@ -8,8 +8,11 @@ import glob
 import unicodedata
 import re
 
-PASTA_BRUTOS = "dados_brutos"
-PASTA_SAIDA = os.path.join("dados_tratados", "brutos")
+# Raiz do projeto (pasta pai de scripts/)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+PASTA_BRUTOS = os.path.join(BASE_DIR, "dados_brutos")
+PASTA_SAIDA = os.path.join(BASE_DIR, "dados_tratados", "brutos")
 
 EXTENSOES = ("*.csv", "*.xlsx", "*.xls", "*.tsv", "*.txt")
 

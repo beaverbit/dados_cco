@@ -18,9 +18,12 @@ from reportlab.platypus import (
 )
 from reportlab.lib.enums import TA_CENTER
 
-ARQ_ANALISES = os.path.join("dados_tratados", "analises_limpas.csv")
-ARQ_NCS = os.path.join("dados_tratados", "nao_conformidades_limpas.csv")
-ARQ_PDF = os.path.join("dados_tratados", "relatorio_cco.pdf")
+# Raiz do projeto (pasta pai de scripts/)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+ARQ_ANALISES = os.path.join(BASE_DIR, "dados_tratados", "analises_limpas.csv")
+ARQ_NCS = os.path.join(BASE_DIR, "dados_tratados", "nao_conformidades_limpas.csv")
+ARQ_PDF = os.path.join(BASE_DIR, "dados_tratados", "relatorio_cco.pdf")
 
 # Paleta idêntica ao 05_dashboard_cco.py
 BG_PRINCIPAL = HexColor("#0E1117")

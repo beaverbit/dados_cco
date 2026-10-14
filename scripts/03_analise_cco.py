@@ -5,9 +5,12 @@ import pandas as pd
 import numpy as np
 import os
 
-ARQ_ANALISES = os.path.join("dados_tratados", "analises_limpas.csv")
-ARQ_NCS = os.path.join("dados_tratados", "nao_conformidades_limpas.csv")
-ARQ_SAIDA = os.path.join("dados_tratados", "resultados_analise_cco.csv")
+# Raiz do projeto (pasta pai de scripts/)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+ARQ_ANALISES = os.path.join(BASE_DIR, "dados_tratados", "analises_limpas.csv")
+ARQ_NCS = os.path.join(BASE_DIR, "dados_tratados", "nao_conformidades_limpas.csv")
+ARQ_SAIDA = os.path.join(BASE_DIR, "dados_tratados", "resultados_analise_cco.csv")
 
 GRAVIDADES_ORDEM = ["Baixa", "Média", "Alta", "Crítica"]
 

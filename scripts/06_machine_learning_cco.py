@@ -10,9 +10,12 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
 import joblib
 
-ARQ_NCS = os.path.join("dados_tratados", "nao_conformidades_limpas.csv")
-PASTA_MODELO = "modelo"
-PASTA_IMAGENS = "imagens"
+# Raiz do projeto (pasta pai de scripts/)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+ARQ_NCS = os.path.join(BASE_DIR, "dados_tratados", "nao_conformidades_limpas.csv")
+PASTA_MODELO = os.path.join(BASE_DIR, "modelo")
+PASTA_IMAGENS = os.path.join(BASE_DIR, "imagens")
 
 FEATURES = ["filial", "classificacao", "codigo_unidade", "capitulo_nc"]
 TARGET = "critica_bin"
