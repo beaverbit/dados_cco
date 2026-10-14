@@ -16,6 +16,15 @@ O pipeline funciona em 3 etapas:
 
 Tudo que entra está em `dados_brutos\`. Tudo que sai está em `dados_tratados\`, `imagens\` e no dashboard.
 
+O `run_all.py` executa 7 scripts em sequência:
+
+1. Extração — consolida os CSVs brutos
+2. Limpeza — valida, explode NCs compostas, padroniza
+3. Análise — gera os 13 KPIs
+4. Visualização — gera os 8 gráficos estáticos em `imagens\`
+5. Machine Learning — treina o modelo (experimental)
+6. Relatório PDF — gera `dados_tratados\relatorio_cco.pdf`
+
 ---
 
 ## 1. Setup inicial (só uma vez)
@@ -79,7 +88,7 @@ Você deve ver `(venv)` no começo da linha:
 pip install -r requirements.txt
 ```
 
-Isso baixa pandas, plotly, streamlit, scikit-learn, pytest e outras. Leva uns 2-4 minutos. **Só precisa fazer uma vez.**
+Isso baixa pandas, plotly, streamlit, scikit-learn, reportlab, pytest e outras. Leva uns 2-4 minutos. **Só precisa fazer uma vez.**
 
 ### 1.7. Confirmar que está tudo certo
 
@@ -172,8 +181,9 @@ python run_all.py
 4. Gera os 13 KPIs
 5. Gera os 8 gráficos estáticos em `imagens\`
 6. Treina o modelo de ML
+7. Gera o relatório PDF em `dados_tratados\relatorio_cco.pdf`
 
-**Tempo esperado:** 30-40 segundos no Windows.
+**Tempo esperado:** 60-80 segundos no Windows. A etapa 07 (PDF) é a mais lenta — leva 30-40s sozinha porque renderiza 13 gráficos via Kaleido.
 
 ### O que olhar na saída
 
@@ -203,6 +213,16 @@ Leia com calma antes de mostrar o dashboard. Os avisos cobrem:
 
 Em geral, indicam problema na planilha de origem, não no pipeline.
 
+### Onde está o PDF
+
+Depois que o pipeline terminar, o relatório PDF está em:
+
+```
+dados_tratados\relatorio_cco.pdf
+```
+
+É um PDF de 7 páginas, com a mesma identidade visual do dashboard (fundo escuro, cards de KPI, 13 gráficos). Pode ser impresso ou enviado por e-mail pra quem não tem acesso ao Streamlit.
+
 ---
 
 ## 4. Abrir o dashboard
@@ -231,7 +251,7 @@ O navegador abre automaticamente em `http://localhost:8501`.
    ```powershell
    python run_all.py
    ```
-5. **Pronto.** O dashboard já mostra os dados novos, e os meses antigos continuam no histórico.
+5. **Pronto.** O dashboard já mostra os dados novos, o PDF é regenerado, e os meses antigos continuam no histórico.
 
 **Importante:** os dados de meses anteriores **não são apagados**. Cada vez que você adiciona um mês, o pipeline lê **tudo** (todos os meses) e regenera os CSVs consolidados. Nada se perde.
 
@@ -305,6 +325,15 @@ py -3.12 -m venv venv
 pip install -r requirements.txt
 ```
 
+### "O PDF não foi gerado"
+
+Verifique:
+
+1. A pasta `dados_tratados\` existe? Se não, rode `mkdir dados_tratados`
+2. O `reportlab` está instalado? Confirme com `pip list | findstr reportlab`. Se não estiver, rode `pip install -r requirements.txt`
+3. A saída do terminal mostra erro na etapa 07? Salve o print e mande
+4. O `kaleido` está instalado? Confirme com `pip list | findstr kaleido`. Sem ele, o Plotly não consegue gerar os PNGs pro PDF
+
 ### "O pipeline rodou, mas o dashboard não abriu"
 
 1. Feche o terminal e rode novamente:
@@ -338,7 +367,8 @@ dados_cco\
 ├── 04_visualizacao_cco.py     # Gera os 8 gráficos estáticos
 ├── 05_dashboard_cco.py        # Dashboard interativo
 ├── 06_machine_learning_cco.py # Treina o modelo de ML
-├── run_all.py                 # Roda tudo em ordem
+├── 07_gerar_pdf_cco.py        # Gera o relatório PDF dark
+├── run_all.py                 # Roda tudo em ordem (01→07)
 │
 ├── dados_brutos\              # ← VOCÊ ALIMENTA AQUI
 │   ├── 2026-09\
@@ -349,6 +379,11 @@ dados_cco\
 │       └── nao_conformidades.csv
 │
 ├── dados_tratados\            # Gerado automaticamente
+│   ├── analises_limpas.csv
+│   ├── nao_conformidades_limpas.csv
+│   ├── resultados_analise_cco.csv
+│   └── relatorio_cco.pdf      ← O PDF sai aqui
+│
 ├── imagens\                   # Gerado automaticamente
 ├── modelo\                    # Gerado automaticamente
 ├── tests\                     # Testes automatizados
@@ -371,7 +406,7 @@ dados_cco\
 7. streamlit run 05_dashboard_cco.py
 ```
 
-Tempo total: **menos de 1 minuto**, contando a exportação.
+Tempo total: **menos de 2 minutos**, contando a exportação.
 
 ---
 
@@ -380,6 +415,6 @@ Tempo total: **menos de 1 minuto**, contando a exportação.
 Se algo der errado:
 
 1. Salve o print da tela e a saída completa do terminal
-2. Identifique qual script falhou (`01` a `06`)
+2. Identifique qual script falhou (`01` a `07`)
 3. Abra o script correspondente e confira o trecho que processa o dado em questão
 4. Se for um caso novo (coluna com nome diferente, tipo de dado novo), ajuste o mapeamento no `02_limpeza_cco.py` e registre a mudança
