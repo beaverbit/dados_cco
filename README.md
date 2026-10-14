@@ -1,6 +1,6 @@
 # Análise de Indicadores Operacionais do CCO
 
-Pipeline de dados aplicado aos registros operacionais do CCO (Centro de Controle Operacional) da Terceirize Mais / Costa Oeste. Processa as análises de conformidade e as não conformidades do Checklist Fácil (CF), gera KPIs operacionais, gráficos estáticos e um dashboard interativo.
+Pipeline de dados aplicado aos registros operacionais do CCO (Centro de Controle Operacional) da Terceirize Mais / Costa Oeste. Processa as análises de conformidade e as não conformidades do Checklist Fácil (CF), gera KPIs operacionais, gráficos estáticos, dashboard interativo e relatório PDF.
 
 - **Fonte dos dados:** planilhas operacionais do CCO (Google Sheets, exportadas em CSV)
 - **Escopo:** automação da análise mensal de conformidade
@@ -40,8 +40,9 @@ dados_cco/
 ├── 04_visualizacao_cco.py      # Gera 8 gráficos estáticos (PNG)
 ├── 05_dashboard_cco.py         # Dashboard interativo (Streamlit)
 ├── 06_machine_learning_cco.py  # Modelo experimental de criticidade
+├── 07_gerar_pdf_cco.py         # Gera relatório PDF dark (A4)
 │
-├── run_all.py                  # Executa 01→06 em ordem (~30s)
+├── run_all.py                  # Executa 01→07 em ordem (~40-80s)
 ├── tests/                      # 53 testes automatizados
 │   ├── conftest.py
 │   ├── test_extracao.py
@@ -51,6 +52,7 @@ dados_cco/
 ├── requirements.txt
 ├── README.md
 ├── PROCESSO.md                 # Guia de uso pra quem vai alimentar o pipeline
+├── WINDOWS.md                  # Guia Windows (validado)
 └── .gitignore
 
 ```
@@ -61,10 +63,11 @@ dados_cco/
 
 | Categoria | Tecnologias |
 | :--- | :--- |
-| **Linguagem** | Python 3.14 |
+| **Linguagem** | Python 3.12 |
 | **Manipulação de dados** | Pandas, NumPy |
 | **Visualização** | Plotly, Kaleido |
 | **Dashboard** | Streamlit |
+| **Relatório PDF** | ReportLab |
 | **Machine Learning** | Scikit-learn (Random Forest) — experimental |
 | **Testes** | pytest |
 | **Versionamento** | Git, GitHub |
@@ -89,7 +92,7 @@ mkdir -p dados_brutos dados_tratados modelo imagens
 ### 3. Crie o ambiente virtual
 
 ```bash
-python3 -m venv venv
+python3.12 -m venv venv
 source venv/bin/activate  # Linux/Mac
 # ou
 venv\Scripts\activate     # Windows
@@ -118,7 +121,7 @@ dados_brutos/
 
 Os arquivos podem ter qualquer nome — o pipeline identifica o tipo pelo conteúdo das colunas.
 
-Para detalhes do processo de exportação do Google Sheets, veja o PROCESSO.md.
+Para detalhes do processo de exportação do Google Sheets, veja o PROCESSO.md (Linux/Mac) ou WINDOWS.md (Windows).
 
 ### 6. Execute o pipeline
 
@@ -134,6 +137,13 @@ python3 02_limpeza_cco.py
 python3 03_analise_cco.py
 python3 04_visualizacao_cco.py
 python3 06_machine_learning_cco.py
+python3 07_gerar_pdf_cco.py
+```
+
+O `05_dashboard_cco.py` roda separado (é um servidor Streamlit, não um script batch):
+
+```bash
+streamlit run 05_dashboard_cco.py
 ```
 
 ### 7. Rode os testes
@@ -142,7 +152,7 @@ python3 06_machine_learning_cco.py
 pytest
 ```
 
-Saída esperada: 53 passed in 0.4s.
+Saída esperada: 53 passed in ~0.5s.
 
 ### 8. Abra o dashboard
 
@@ -151,6 +161,40 @@ streamlit run 05_dashboard_cco.py
 ```
 
 Acesse http://localhost:8501 no navegador.
+
+---
+
+## Saídas Geradas
+
+Depois de rodar o pipeline, os seguintes arquivos existem:
+
+```
+dados_tratados/
+├── brutos/                                # Consolidados por tipo (etapa 01)
+│   ├── analise__consolidado.csv
+│   └── nc__consolidado.csv
+├── analises_limpas.csv                    # Análises limpas (etapa 02)
+├── nao_conformidades_limpas.csv           # NCs explodidas (etapa 02)
+├── parametros_limpos.csv                  # Se houver aba de parâmetros
+├── resultados_analise_cco.csv             # 13 KPIs em texto (etapa 03)
+└── relatorio_cco.pdf                      # Relatório PDF dark (etapa 07)
+
+imagens/                                   # 8 PNGs estáticos (etapa 04)
+├── 01_distribuicao_resultados.png
+├── 02_analises_nc_por_filial.png
+├── 03_analises_por_analista.png
+├── 04_analises_por_mes.png
+├── 05_nc_por_gravidade.png
+├── 06_nc_por_classificacao.png
+├── 07_nc_por_capitulo.png
+├── 08_filial_x_gravidade.png
+├── 09_matriz_confusao_cco.png             # Gerados pelo ML (etapa 06)
+└── 10_importancia_features_cco.png
+
+modelo/                                    # Modelo treinado (etapa 06)
+├── modelo_cco.pkl
+└── encoders_cco.pkl
+```
 
 ---
 
@@ -165,14 +209,14 @@ Acesse http://localhost:8501 no navegador.
 - 6. Análises por mês
 - 7. NCs por gravidade
 - 8. NCs por classificação
-- 9. NCs por capítulo do checklist
+- 9. NCs por área do checklist
 - 10. Top 15 códigos de NC mais recorrentes
 - 11. NCs por filial
 - 12. Filial x Gravidade (cruzamento)
 - 13. NCs registradas por analista
 ```
 
-Resultados salvos em dados_tratados/resultados_analise_cco.csv.
+Resultados salvos em `dados_tratados/resultados_analise_cco.csv`.
 
 ---
 
@@ -190,13 +234,13 @@ O modelo de ML foi desenvolvido como experimento pessoal, não como parte do esc
 ### O que o modelo faz:
 
 - Alvo: prever se uma NC é Crítica ou Outra
-- Features: filial, classificação, código da unidade, capítulo do checklist
+- Features: filial, classificação, código da unidade, área do checklist
 - Algoritmo: Random Forest
-- Arquivos gerados: modelo/modelo_cco.pkl, modelo/encoders_cco.pkl
+- Arquivos gerados: `modelo/modelo_cco.pkl`, `modelo/encoders_cco.pkl`
 
 ### Quando fará sentido usar:
 
-Quando houver 6+ meses de dados acumulados, com distribuição mais equilibrada entre as classes. Nesse cenário, é possível retreinar, adicionar stratify=y, comparar com DummyClassifier como baseline e avaliar precision/recall por classe em vez de só acurácia global.
+Quando houver 6+ meses de dados acumulados, com distribuição mais equilibrada entre as classes. Nesse cenário, é possível retreinar, adicionar `stratify=y`, comparar com `DummyClassifier` como baseline e avaliar precision/recall por classe em vez de só acurácia global.
 
 ---
 
@@ -235,6 +279,10 @@ O Matplotlib 3.9.2 estoura a pilha (RecursionError) no Python 3.14 ao tentar faz
 ### Por que explodir as NCs?
 
 Uma linha da aba "Não Conformidades" pode conter várias NCs separadas por / (ex: 3.2 / 5.3 / 6.1). Sem explode, uma linha poderia contar como 1 NC ou como 3. O explode garante que cada NC seja contada individualmente.
+
+### Por que ReportLab pro PDF e não gerar HTML?
+
+ReportLab gera PDF nativo, com paginação real, e permite pintar o fundo de cada página via `onFirstPage`/`onLaterPages`. A alternativa (HTML + wkhtmltopdf) exigiria dependência externa e não roda sem admin no Windows.
 
 ---
 
