@@ -235,6 +235,7 @@ col4.metric("Taxa de Não Conformidade", f"{taxa_nc:.2f}%")
 st.divider()
 
 
+# ---------- Gráfico 1: Análises e NCs por Filial ----------
 st.subheader("Análises e NCs por Filial")
 
 resumo_filial = df_a_f.groupby("filial").agg(
@@ -249,6 +250,10 @@ fig1.add_trace(go.Bar(
     name="Total de análises",
     marker_color="#2E7D32",
     yaxis="y1",
+    text=resumo_filial["total"],
+    textposition="outside",
+    textfont=dict(color="#F0F6FC", size=12),
+    cliponaxis=False,
 ))
 fig1.add_trace(go.Scatter(
     x=resumo_filial["filial"],
@@ -258,6 +263,7 @@ fig1.add_trace(go.Scatter(
     marker=dict(color="#C62828", size=10),
     line=dict(width=3),
     yaxis="y2",
+    hovertemplate="%{x}<br>NCs: %{y}<extra></extra>",
 ))
 fig1.update_layout(
     yaxis=dict(title="Total de análises", side="left"),
@@ -269,6 +275,7 @@ aplicar_tema(fig1, 400)
 st.plotly_chart(fig1, width="stretch", theme=None)
 
 
+# ---------- Gráfico 2: Taxa de Conformidade por Filial ----------
 st.subheader("Taxa de Conformidade por Filial")
 
 resumo_conf = df_a_f.groupby("filial").agg(
@@ -286,12 +293,18 @@ fig2 = px.bar(
     labels={"filial": "Filial", "taxa_conformidade": "Taxa de Conformidade (%)"},
     text="taxa_conformidade",
 )
-fig2.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
+fig2.update_traces(
+    texttemplate="%{text:.1f}%",
+    textposition="outside",
+    textfont=dict(color="#F0F6FC", size=12),
+    cliponaxis=False,
+)
 fig2.update_layout(coloraxis_showscale=False)
 aplicar_tema(fig2, 400)
 st.plotly_chart(fig2, width="stretch", theme=None)
 
 
+# ---------- Gráfico 3: Distribuição Mensal ----------
 st.subheader("Distribuição Mensal de Análises e NCs")
 
 resumo_mes = df_a_f.groupby("mes").agg(
@@ -303,10 +316,18 @@ fig3 = go.Figure()
 fig3.add_trace(go.Bar(
     x=resumo_mes["mes"], y=resumo_mes["total"],
     name="Análises", marker_color="#2E7D32",
+    text=resumo_mes["total"],
+    textposition="outside",
+    textfont=dict(color="#F0F6FC", size=12),
+    cliponaxis=False,
 ))
 fig3.add_trace(go.Bar(
     x=resumo_mes["mes"], y=resumo_mes["nc"],
     name="NCs", marker_color="#C62828",
+    text=resumo_mes["nc"],
+    textposition="outside",
+    textfont=dict(color="#F0F6FC", size=12),
+    cliponaxis=False,
 ))
 fig3.update_layout(
     barmode="group",
@@ -318,6 +339,7 @@ aplicar_tema(fig3, 400)
 st.plotly_chart(fig3, width="stretch", theme=None)
 
 
+# ---------- Gráfico 4: Dia da Semana ----------
 st.subheader("Distribuição por Dia da Semana e Taxa de Não Conformidade")
 
 mapa_dias = {
@@ -346,6 +368,10 @@ fig4.add_trace(go.Bar(
     name="Total de análises",
     marker_color="#2E7D32",
     yaxis="y1",
+    text=resumo_dia["total"],
+    textposition="outside",
+    textfont=dict(color="#F0F6FC", size=12),
+    cliponaxis=False,
 ))
 fig4.add_trace(go.Scatter(
     x=resumo_dia["dia_semana_pt"],
@@ -355,6 +381,7 @@ fig4.add_trace(go.Scatter(
     marker=dict(color="#C62828", size=8),
     line=dict(width=3),
     yaxis="y2",
+    hovertemplate="%{x}<br>Taxa NC: %{y:.1f}%<extra></extra>",
 ))
 fig4.update_layout(
     yaxis=dict(title="Total de análises", side="left"),
@@ -366,6 +393,7 @@ aplicar_tema(fig4, 400)
 st.plotly_chart(fig4, width="stretch", theme=None)
 
 
+# ---------- Gráficos 5 e 6: Resultado e Classificação (lado a lado) ----------
 col_c, col_d = st.columns(2)
 
 with col_c:
@@ -387,7 +415,11 @@ with col_c:
         labels={"resultado": "Resultado", "total": "Análises"},
         text="total",
     )
-    fig5.update_traces(textposition="outside")
+    fig5.update_traces(
+        textposition="outside",
+        textfont=dict(color="#F0F6FC", size=13),
+        cliponaxis=False,
+    )
     fig5.update_layout(showlegend=False)
     aplicar_tema(fig5, 400)
     st.plotly_chart(fig5, width="stretch", theme=None)
@@ -412,10 +444,17 @@ with col_d:
         category_orders={"classificacao": ordem_class},
         hole=0.4,
     )
+    fig6.update_traces(
+        textposition="inside",
+        textinfo="value+percent",
+        textfont=dict(color="#FFFFFF", size=13),
+        insidetextorientation="radial",
+    )
     aplicar_tema(fig6, 400)
     st.plotly_chart(fig6, width="stretch", theme=None)
 
 
+# ---------- Gráfico 7: Unidades com Maior Incidência (sem números) ----------
 st.subheader("Unidades com Maior Incidência de NCs")
 
 if df_n_f is not None and len(df_n_f) > 0:
@@ -433,14 +472,13 @@ if df_n_f is not None and len(df_n_f) > 0:
         orientation="h",
         color="total", color_continuous_scale="Reds",
         labels={"total": "Total de NCs", "codigo_unidade": "Unidade"},
-        text="total",
     )
-    fig7.update_traces(texttemplate="%{text:,}", textposition="outside")
     fig7.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig7, 500)
     st.plotly_chart(fig7, width="stretch", theme=None)
 
 
+# ---------- Gráfico 8: NCs por Gravidade ----------
 st.subheader("NCs por Gravidade")
 
 if df_n_f is not None and len(df_n_f) > 0:
@@ -454,12 +492,18 @@ if df_n_f is not None and len(df_n_f) > 0:
         labels={"gravidade": "Gravidade", "total": "NCs"},
         text="total",
     )
-    fig8.update_traces(texttemplate="%{text:,}", textposition="outside")
+    fig8.update_traces(
+        texttemplate="%{text:,}",
+        textposition="outside",
+        textfont=dict(color="#F0F6FC", size=13),
+        cliponaxis=False,
+    )
     fig8.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig8, 400)
     st.plotly_chart(fig8, width="stretch", theme=None)
 
 
+# ---------- Gráfico 9: Itens com Maior Reincidência (sem números) ----------
 st.subheader("Itens do Checklist com Maior Reincidência")
 
 if df_n_f is not None and len(df_n_f) > 0:
@@ -476,15 +520,14 @@ if df_n_f is not None and len(df_n_f) > 0:
         orientation="h",
         color="total", color_continuous_scale="Reds",
         labels={"total": "Total de NCs", "codigo_nc": "Código"},
-        text="total",
     )
-    fig9.update_traces(texttemplate="%{text:,}", textposition="outside")
     fig9.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig9, 900)
     st.plotly_chart(fig9, width="stretch", theme=None)
 
 
-st.subheader("NCs por Capítulo do Checklist")
+# ---------- Gráfico 10: NCs por Área ----------
+st.subheader("NCs por Área do Checklist")
 
 if df_n_f is not None and len(df_n_f) > 0:
     resumo_cap = df_n_f.groupby("capitulo_nc").agg(
@@ -496,15 +539,21 @@ if df_n_f is not None and len(df_n_f) > 0:
     fig10 = px.bar(
         resumo_cap, x="capitulo_nc", y="total",
         color="total", color_continuous_scale="Greens",
-        labels={"capitulo_nc": "Capítulo", "total": "NCs"},
+        labels={"capitulo_nc": "Área", "total": "NCs"},
         text="total",
     )
-    fig10.update_traces(texttemplate="%{text:,}", textposition="outside")
+    fig10.update_traces(
+        texttemplate="%{text:,}",
+        textposition="outside",
+        textfont=dict(color="#F0F6FC", size=13),
+        cliponaxis=False,
+    )
     fig10.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig10, 400)
     st.plotly_chart(fig10, width="stretch", theme=None)
 
 
+# ---------- Gráfico 11: Filial x Gravidade (sem números dentro) ----------
 st.subheader("Filial x Gravidade")
 
 if df_n_f is not None and len(df_n_f) > 0:
@@ -531,6 +580,7 @@ if df_n_f is not None and len(df_n_f) > 0:
         fig11.add_trace(go.Bar(
             y=pivot["filial"], x=pivot[g], name=g, orientation="h",
             marker_color=cores_grav[g],
+            hovertemplate="%{y}<br>" + g + ": %{x}<extra></extra>",
         ))
     fig11.update_layout(
         barmode="stack",
@@ -542,6 +592,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     st.plotly_chart(fig11, width="stretch", theme=None)
 
 
+# ---------- Gráfico 12: NCs por Dia da Semana ----------
 st.subheader("NCs Registradas por Dia da Semana")
 
 if df_n_f is not None and len(df_n_f) > 0 and "dia_semana" in df_a_f.columns:
@@ -564,13 +615,19 @@ if df_n_f is not None and len(df_n_f) > 0 and "dia_semana" in df_a_f.columns:
         labels={"dia_semana_pt": "Dia", "total": "NCs"},
         text="total",
     )
-    fig12.update_traces(texttemplate="%{text:,}", textposition="outside")
+    fig12.update_traces(
+        texttemplate="%{text:,}",
+        textposition="outside",
+        textfont=dict(color="#F0F6FC", size=12),
+        cliponaxis=False,
+    )
     fig12.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig12, 400)
     st.plotly_chart(fig12, width="stretch", theme=None)
 
 
-st.subheader("Gravidade das NCs por Capítulo")
+# ---------- Gráfico 13: Gravidade das NCs por Área (sem números dentro) ----------
+st.subheader("Gravidade das NCs por Área")
 
 if df_n_f is not None and len(df_n_f) > 0:
     ordem_grav = ["Baixa", "Média", "Alta", "Crítica"]
@@ -595,10 +652,11 @@ if df_n_f is not None and len(df_n_f) > 0:
         fig13.add_trace(go.Bar(
             x=pivot_cap["capitulo_nc"], y=pivot_cap[g], name=g,
             marker_color=cores_grav[g],
+            hovertemplate="Área %{x}<br>" + g + ": %{y}<extra></extra>",
         ))
     fig13.update_layout(
         barmode="stack",
-        xaxis_title="Capítulo",
+        xaxis_title="Área",
         yaxis_title="NCs",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
@@ -641,7 +699,7 @@ else:
                 options=sorted(df_n["codigo_unidade"].dropna().unique().tolist()),
             )
             capitulo_input = st.selectbox(
-                "Capítulo do checklist",
+                "Área do checklist",
                 options=sorted(df_n["capitulo_nc"].dropna().unique().tolist()),
             )
 
@@ -724,7 +782,12 @@ else:
                 color_continuous_scale="Reds",
                 text="Probabilidade (%)",
             )
-            fig_pred.update_traces(texttemplate="%{text:.1f}%", textposition="outside")
+            fig_pred.update_traces(
+                texttemplate="%{text:.1f}%",
+                textposition="outside",
+                textfont=dict(color="#F0F6FC", size=12),
+                cliponaxis=False,
+            )
             fig_pred.update_layout(showlegend=False, coloraxis_showscale=False)
             aplicar_tema(fig_pred, 300)
             st.plotly_chart(fig_pred, width="stretch", theme=None)
