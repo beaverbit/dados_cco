@@ -1,30 +1,26 @@
-# Análise de Indicadores Operacionais do CCO
+# Pipeline de Indicadores Operacionais
 
-Pipeline de dados aplicado aos registros operacionais do CCO (Centro de Controle Operacional) da Terceirize Mais / Costa Oeste. Processa as análises de conformidade e as não conformidades do Checklist Fácil (CF), gera KPIs operacionais, gráficos estáticos, dashboard interativo e relatório PDF.
+Pipeline de dados para extração, limpeza, análise e visualização de registros de conformidade operacional. Processa planilhas de análise e não conformidades, gera KPIs, gráficos estáticos, dashboard interativo e relatório PDF.
 
-- **Fonte dos dados:** planilhas operacionais do CCO (Google Sheets, exportadas em CSV)
-- **Escopo:** automação da análise mensal de conformidade
-- **Status:** em uso interno
+Estrutura modular, adaptável a diferentes operações baseadas em checklists.
+
+- **Fonte dos dados:** planilhas operacionais exportadas em CSV
+- **Escopo:** automação de análise mensal de conformidade
 
 ---
 
-## Visão Geral
+## O que o projeto faz
 
-- **Período analisado:** 2026 (dados de julho a outubro)
-- **Total de análises registradas:** 570
-- **Análises finalizadas:** 523
-- **Não conformidades (após explode):** 224
-- **Filial com maior taxa de NC:** Curitiba (76,09%)
-- **Item do checklist com maior reincidência:** 1.1 — foto do executante (153 ocorrências)
+O pipeline cobre o ciclo completo de análise:
 
-### Sobre os dois números de NCs
+1. **Extração** — varre os arquivos brutos, detecta tipo por conteúdo e consolida por categoria
+2. **Limpeza** — normaliza colunas, converte tipos, expande registros compostos, valida qualidade
+3. **Análise** — gera 13 KPIs operacionais (geral, por filial, por unidade, por analista, por mês, por gravidade, etc.)
+4. **Visualização** — 8 gráficos estáticos em PNG
+5. **Machine Learning** — modelo experimental de classificação de criticidade
+6. **Relatório PDF** — relatório visual com a mesma identidade do dashboard
 
-O projeto trabalha com duas métricas diferentes de não conformidade:
-
-- **161 NCs** — soma da coluna `Qtd NC` das análises. Mede quantas NCs o analista registrou **por análise**.
-- **224 NCs** — total após explodir as linhas com NCs compostas (`3.2 / 5.3 / 6.1` vira 3 linhas). Mede quantas NCs **individuais** existem no dataset.
-
-As duas são corretas, mas medem coisas diferentes. A primeira é usada nos KPIs de desempenho; a segunda nos KPIs de causa.
+Os resultados são consumidos via dashboard interativo (Streamlit) ou relatório PDF.
 
 ---
 
@@ -104,9 +100,9 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### 5. Coloque os dados brutos em dados_brutos/
+### 5. Coloque os dados brutos em `dados_brutos/`
 
-Crie uma subpasta por mês, no formato AAAA-MM:
+Crie uma subpasta por mês, no formato `AAAA-MM`:
 
 ```
 dados_brutos/
@@ -120,7 +116,7 @@ dados_brutos/
 
 Os arquivos podem ter qualquer nome — o pipeline identifica o tipo pelo conteúdo das colunas.
 
-Para detalhes do processo de exportação do Google Sheets, veja o PROCESSO.md (Linux/Mac) ou WINDOWS.md (Windows).
+Para detalhes do processo de exportação, veja o `PROCESSO.md` (Linux/Mac) ou `WINDOWS.md` (Windows).
 
 ### 6. Execute o pipeline
 
@@ -163,9 +159,25 @@ Acesse http://localhost:8501 no navegador.
 
 ---
 
+## Formato Esperado dos Dados
+
+O pipeline identifica o tipo de arquivo **pelo conteúdo das colunas**, não pelo nome. As colunas esperadas são:
+
+**Registro de análises:**
+`ID da Análise`, `ID Checklist`, `Analista`, `Filial`, `Data da Avaliação`, `Resultado`, `Classificação`, `% Nota`, `Qtd NC`, `Observações Gerais`, `Status`, `Nome da Unidade`
+
+**Não conformidades:**
+`ID Análise`, `Pergunta`, `Classificação`, `Departamento`, `Gravidade`, `Observação`, `Filial`, `Analista`, `Criticidade`
+
+A coluna `Pergunta` pode conter múltiplos códigos separados por `/` (ex: `3.2 / 5.3 / 6.1`). O pipeline expande automaticamente cada código em uma linha separada.
+
+Se o formato dos seus dados for diferente, ajuste o mapeamento de colunas em `scripts/02_limpeza_cco.py`, na função `limpar_analises` ou `limpar_ncs`.
+
+---
+
 ## Saídas Geradas
 
-Depois de rodar o pipeline, os seguintes arquivos existem:
+Depois de rodar o pipeline:
 
 ```
 dados_tratados/
@@ -173,7 +185,7 @@ dados_tratados/
 │   ├── analise__consolidado.csv
 │   └── nc__consolidado.csv
 ├── analises_limpas.csv                    # Análises limpas (etapa 02)
-├── nao_conformidades_limpas.csv           # NCs explodidas (etapa 02)
+├── nao_conformidades_limpas.csv           # NCs expandidas (etapa 02)
 ├── parametros_limpos.csv                  # Se houver aba de parâmetros
 ├── resultados_analise_cco.csv             # 13 KPIs em texto (etapa 03)
 └── relatorio_cco.pdf                      # Relatório PDF dark (etapa 07)
@@ -221,25 +233,22 @@ Resultados salvos em `dados_tratados/resultados_analise_cco.csv`.
 
 ## Machine Learning (script 06) — Experimental
 
-O modelo de ML foi desenvolvido como experimento pessoal, não como parte do escopo operacional do projeto. Ele está no repositório como demonstração técnica, mas não deve ser usado para decisões operacionais.
+O modelo de ML foi desenvolvido como experimento pessoal, não como parte do escopo operacional do projeto. Ele está no repositório como demonstração técnica, mas **não deve ser usado para decisões operacionais**.
 
 ### Por que ainda não é confiável:
 
-- A classe "Crítica" representa 96,88% das amostras (217 de 224 NCs)
-- Um classificador trivial que sempre prevê "Crítica" já acertaria 96,88%
-- A classe "Outra" tem apenas 7 amostras no dataset atual
-- Com esse desbalanceamento, não há padrão estatístico que o modelo possa aprender
+Quando uma das classes é muito mais frequente que a outra (desbalanceamento severo), o modelo tende a aprender apenas a prever a classe majoritária. Isso infla a acurácia global sem que o modelo tenha aprendido qualquer padrão útil. Um classificador trivial que sempre prevê a mesma classe já acertaria a mesma porcentagem.
 
 ### O que o modelo faz:
 
-- Alvo: prever se uma NC é Crítica ou Outra
+- Alvo: prever se uma NC é crítica ou não
 - Features: filial, classificação, código da unidade, área do checklist
 - Algoritmo: Random Forest
 - Arquivos gerados: `modelo/modelo_cco.pkl`, `modelo/encoders_cco.pkl`
 
 ### Quando fará sentido usar:
 
-Quando houver 6+ meses de dados acumulados, com distribuição mais equilibrada entre as classes. Nesse cenário, é possível retreinar, adicionar `stratify=y`, comparar com `DummyClassifier` como baseline e avaliar precision/recall por classe em vez de só acurácia global.
+Quando houver dados suficientes para que as duas classes apareçam com frequência razoável. Nesse cenário, é possível retreinar com `stratify=y` no `train_test_split`, comparar com um baseline (`DummyClassifier`) e avaliar precision/recall por classe em vez de só acurácia global.
 
 ---
 
@@ -253,11 +262,11 @@ pytest
 
 ### O que é testado:
 
-- Extração: normalização de nomes de coluna, classificação por conteúdo, detecção de header
-- Limpeza: conversão de tipos, explode de NCs compostas, tratamento de valores nulos, formato BR de decimais
-- Análise: cálculo de KPIs, agrupamentos, ordenação, tratamento de DataFrame vazio
+- **Extração:** normalização de nomes de coluna, classificação por conteúdo, detecção de header
+- **Limpeza:** conversão de tipos, expande de NCs compostas, tratamento de valores nulos, formato BR de decimais
+- **Análise:** cálculo de KPIs, agrupamentos, ordenação, tratamento de DataFrame vazio
 
-Casos-limite cobertos: DataFrame vazio, None em coluna de texto, % Nota com vírgula decimal, pergunta vazia após explode, pergunta que não é código.
+Casos-limite cobertos: DataFrame vazio, `None` em coluna de texto, `% Nota` com vírgula decimal, pergunta vazia após expande, pergunta que não é código.
 
 ---
 
@@ -265,7 +274,7 @@ Casos-limite cobertos: DataFrame vazio, None em coluna de texto, % Nota com vír
 
 ### Por que CSV e não XLSX?
 
-O Google Sheets exporta .xlsx com as células vazias viradas em 1900-01-01 00:00:00 quando lê com Pandas. Isso fazia 87% das NCs do arquivo bruto virarem linhas com data em vez de código. A solução foi exportar em CSV, que preserva os valores como texto.
+O Google Sheets exporta `.xlsx` com as células vazias viradas em `1900-01-01 00:00:00` quando lido com Pandas. Isso fazia a maioria das NCs do arquivo bruto virar linhas com data em vez de código. A solução foi exportar em CSV, que preserva os valores como texto.
 
 ### Por que classificar arquivos por conteúdo e não por nome?
 
@@ -273,11 +282,11 @@ O usuário pode salvar os CSVs com qualquer nome. Se o pipeline dependesse do no
 
 ### Por que Plotly + Kaleido e não Matplotlib?
 
-O Matplotlib 3.9.2 estoura a pilha (RecursionError) no Python 3.14 ao tentar fazer deepcopy dos markers. Plotly + Kaleido não tem esse problema e gera os PNGs sem erro.
+O Matplotlib estoura a pilha (`RecursionError`) em algumas versões do Python ao tentar fazer `deepcopy` dos markers. Plotly + Kaleido não tem esse problema e gera os PNGs sem erro.
 
-### Por que explodir as NCs?
+### Por que expandir as NCs?
 
-Uma linha da aba "Não Conformidades" pode conter várias NCs separadas por / (ex: 3.2 / 5.3 / 6.1). Sem explode, uma linha poderia contar como 1 NC ou como 3. O explode garante que cada NC seja contada individualmente.
+Uma linha da aba de não conformidades pode conter várias NCs separadas por `/`. Sem a expansão, uma linha poderia contar como uma NC ou como várias. A expansão garante que cada NC seja contada individualmente.
 
 ### Por que ReportLab pro PDF e não gerar HTML?
 
