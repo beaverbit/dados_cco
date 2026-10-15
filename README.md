@@ -31,12 +31,16 @@ dados_cco/
 │
 ├── scripts/                     # Todos os scripts executáveis
 │   ├── 01_extracao_cco.py       # Lê e consolida CSVs de múltiplos meses
-│   ├── 02_limpeza_cco.py        # Limpa, valida e explode NCs compostas
+│   ├── 02_limpeza_cco.py        # Limpa, valida e expande NCs compostas
 │   ├── 03_analise_cco.py        # Gera 13 KPIs operacionais
 │   ├── 04_visualizacao_cco.py   # Gera 8 gráficos estáticos (PNG)
 │   ├── 05_dashboard_cco.py      # Dashboard interativo (Streamlit)
 │   ├── 06_machine_learning_cco.py  # Modelo experimental de criticidade
 │   └── 07_gerar_pdf_cco.py      # Gera relatório PDF dark (A4)
+│
+├── docs/                        # Documentação complementar
+│   ├── PROCESSO.md              # Guia de uso (Linux/Mac)
+│   └── WINDOWS.md               # Guia de uso (Windows)
 │
 ├── run_all.py                   # Executa scripts/01→07 em ordem (~40-80s)
 ├── tests/                       # 53 testes automatizados
@@ -47,8 +51,6 @@ dados_cco/
 ├── pytest.ini
 ├── requirements.txt
 ├── README.md
-├── PROCESSO.md
-├── WINDOWS.md
 └── .gitignore
 ```
 
