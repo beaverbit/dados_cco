@@ -116,7 +116,7 @@ dados_brutos/
 
 Os arquivos podem ter qualquer nome — o pipeline identifica o tipo pelo conteúdo das colunas.
 
-Para detalhes do processo de exportação, veja o `PROCESSO.md` (Linux/Mac) ou `WINDOWS.md` (Windows).
+Para detalhes do processo de exportação, veja o [`PROCESSO.md`](docs/PROCESSO.md) (Linux/Mac) ou [`WINDOWS.md`](docs/WINDOWS.md) (Windows).
 
 ### 6. Execute o pipeline
 
