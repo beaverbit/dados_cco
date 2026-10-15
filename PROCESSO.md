@@ -1,4 +1,4 @@
-# PROCESSO — Como Alimentar o Pipeline do CCO
+# PROCESSO — Como Alimentar o Pipeline
 
 Guia rápido pra quem vai rodar o pipeline no dia a dia. Não precisa saber Python — só seguir os passos.
 
