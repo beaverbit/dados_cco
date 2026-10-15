@@ -9,9 +9,9 @@ Guia rápido pra quem vai rodar o pipeline no dia a dia. Não precisa saber Pyth
 O pipeline funciona em 3 etapas:
 
 ```
-1. Exportar dados do Google Sheets   (manual, uma vez por mês)
-2. Rodar o pipeline Python           (comando único)
-3. Abrir o dashboard                 (comando único)
+1. Exportar dados da fonte    (manual, uma vez por ciclo)
+2. Rodar o pipeline Python    (comando único)
+3. Abrir o dashboard          (comando único)
 ```
 
 Tudo que entra está em `dados_brutos/`. Tudo que sai está em `dados_tratados/`, `imagens/` e no dashboard.
@@ -19,7 +19,7 @@ Tudo que entra está em `dados_brutos/`. Tudo que sai está em `dados_tratados/`
 O `run_all.py` executa 7 scripts em sequência:
 
 1. Extração — consolida os CSVs brutos
-2. Limpeza — valida, explode NCs compostas, padroniza
+2. Limpeza — valida, expande NCs compostas, padroniza
 3. Análise — gera os 13 KPIs
 4. Visualização — gera os 8 gráficos estáticos em `imagens/`
 5. Machine Learning — treina o modelo (experimental)
@@ -27,34 +27,30 @@ O `run_all.py` executa 7 scripts em sequência:
 
 ---
 
-## 1. Exportar os dados do Google Sheets
+## 1. Exportar os dados da fonte
 
 ### O que exportar
 
-A planilha do CCO tem **duas abas** que interessam:
+O pipeline trabalha com **duas categorias de registros**:
 
 - **Registro das Análises** — uma linha por análise realizada
 - **Não Conformidades** — uma linha por NC registrada
 
 ### Como exportar
 
-Para cada aba:
+A forma de exportar depende da fonte. O pipeline espera **CSV** como formato de entrada.
 
-1. Abra a aba no Google Sheets
-2. Vá em **Arquivo → Fazer download → Valores separados por vírgula (.csv)**
-3. O arquivo vai baixar para a pasta de downloads do navegador
-
-**Importante:** exporte em **CSV**, nunca em **Excel (.xlsx)**. O `.xlsx` do Google Sheets tem um bug conhecido que transforma células vazias em `1900-01-01 00:00:00`, o que quebra o pipeline.
+**Importante:** exporte sempre em **CSV**, nunca em **Excel (.xlsx)**. Algumas ferramentas (como o Google Sheets) geram `.xlsx` com células vazias viradas em `1900-01-01 00:00:00` quando lidas com Pandas, o que quebra o pipeline.
 
 ### Onde salvar
 
-Dentro da pasta do projeto, crie uma subpasta com o nome do mês no formato `AAAA-MM`:
+Dentro da pasta do projeto, crie uma subpasta com o período de referência no formato `AAAA-MM`:
 
 ```
 dados_brutos/
 ├── 2026-07/
 ├── 2026-08/
-└── 2026-09/          ← mês atual
+└── 2026-09/          ← período atual
     ├── registro_analises.csv
     └── nao_conformidades.csv
 ```
@@ -63,13 +59,13 @@ dados_brutos/
 
 - O nome da pasta **precisa** estar no formato `AAAA-MM` (ex: `2026-09`, `2026-10`)
 - Você pode salvar os CSVs com **qualquer nome** — o pipeline identifica pelo conteúdo, não pelo nome
-- Cada mês fica em sua própria subpasta
+- Cada período fica em sua própria subpasta
 
-**Exemplo prático:** para adicionar setembro de 2026:
+**Exemplo prático:** para adicionar um novo período:
 
 ```bash
-mkdir -p dados_brutos/2026-09
-# Copie os dois CSVs baixados pra dentro dessa pasta
+mkdir -p dados_brutos/AAAA-MM
+# Copie os dois CSVs exportados pra dentro dessa pasta
 ```
 
 ---
@@ -78,11 +74,11 @@ mkdir -p dados_brutos/2026-09
 
 ### Antes de rodar
 
-Confirme que os CSVs do mês estão na subpasta correta:
+Confirme que os CSVs do período estão na subpasta correta:
 
 ```bash
-ls dados_brutos/2026-09/
-# Deve mostrar: registro_analises.csv  nao_conformidades.csv
+ls dados_brutos/AAAA-MM/
+# Deve mostrar os dois CSVs exportados
 ```
 
 ### Rodar
@@ -95,9 +91,9 @@ python3 run_all.py
 
 **O que esse comando faz:**
 
-1. Lê todos os CSVs de `dados_brutos/` (todos os meses)
+1. Lê todos os CSVs de `dados_brutos/` (todos os períodos)
 2. Consolida por tipo (análises e NCs)
-3. Limpa, explode NCs compostas e padroniza
+3. Limpa, expande NCs compostas e padroniza
 4. Gera os 13 KPIs
 5. Gera os 8 gráficos estáticos em `imagens/`
 6. Treina o modelo de ML
@@ -124,11 +120,11 @@ VALIDAÇÃO: X aviso(s) encontrado(s)
 
 - **Contagem baixa** — pode indicar que os CSVs não foram salvos corretamente
 - **Muitos valores vazios** — a planilha pode estar com colunas faltando
-- **Taxa de NC suspeita** — mais de 90% das análises como "Não Conforme"
+- **Taxa de NC suspeita** — mais de 90% dos registros como "Não Conforme"
 - **Gravidade suspeita** — mais de 90% das NCs como "Crítica"
 - **Duplicatas** — linhas repetidas na planilha
 
-Em geral, esses avisos indicam problema na planilha de origem, não no pipeline.
+Em geral, esses avisos indicam problema na fonte dos dados, não no pipeline.
 
 ### Onde está o PDF
 
@@ -145,7 +141,7 @@ dados_tratados/relatorio_cco.pdf
 ## 3. Abrir o dashboard
 
 ```bash
-streamlit run 05_dashboard_cco.py
+streamlit run scripts/05_dashboard_cco.py
 ```
 
 O navegador abre automaticamente em `http://localhost:8501`.
@@ -156,21 +152,21 @@ O navegador abre automaticamente em `http://localhost:8501`.
 
 ---
 
-## Adicionando um mês novo
+## Adicionando um período novo
 
-1. **Baixe os CSVs** do Google Sheets (ver passo 1)
-2. **Crie a subpasta** do mês:
+1. **Exporte os CSVs** da fonte (ver passo 1)
+2. **Crie a subpasta** do período:
    ```bash
-   mkdir -p dados_brutos/2026-10
+   mkdir -p dados_brutos/AAAA-MM
    ```
 3. **Salve os CSVs** dentro da pasta
 4. **Rode o pipeline:**
    ```bash
    python3 run_all.py
    ```
-5. **Pronto.** O dashboard já mostra os dados novos, o PDF é regenerado, e os meses antigos continuam no histórico.
+5. **Pronto.** O dashboard já mostra os dados novos, o PDF é regenerado, e os períodos antigos continuam no histórico.
 
-**Importante:** os dados de meses anteriores **não são apagados**. Cada vez que você adiciona um mês, o pipeline lê **tudo** (todos os meses) e regenera os CSVs consolidados. Nada se perde.
+**Importante:** os dados de períodos anteriores **não são apagados**. Cada vez que você adiciona um período, o pipeline lê **tudo** (todos os períodos) e regenera os CSVs consolidados. Nada se perde.
 
 ---
 
@@ -180,13 +176,13 @@ O navegador abre automaticamente em `http://localhost:8501`.
 
 Confira:
 
-1. Os CSVs estão na subpasta certa? (`dados_brutos/2026-09/` e não `dados_brutos/`)
+1. Os CSVs estão na subpasta certa? (`dados_brutos/AAAA-MM/` e não `dados_brutos/`)
 2. O nome da pasta está no formato `AAAA-MM`?
 3. O pipeline rodou sem erro? Confira a saída do `run_all.py`
 
 ### "Apareceu aviso de que muitas NCs são Críticas"
 
-Isso é um **problema na planilha**, não no pipeline. A fórmula que calcula a gravidade no Google Sheets provavelmente está com problema.
+Isso é um **problema na fonte**, não no pipeline. A fórmula que calcula a gravidade na planilha de origem provavelmente está com problema.
 
 **O que fazer:**
 
@@ -225,13 +221,15 @@ Feche o terminal e abra de novo. Se o erro persistir, me chama.
 ```
 dados_cco/
 │
-├── 01_extracao_cco.py         # Lê e consolida os CSVs brutos
-├── 02_limpeza_cco.py          # Limpa e valida os dados
-├── 03_analise_cco.py          # Gera os 13 KPIs
-├── 04_visualizacao_cco.py     # Gera os 8 gráficos estáticos
-├── 05_dashboard_cco.py        # Dashboard interativo
-├── 06_machine_learning_cco.py # Treina o modelo de ML
-├── 07_gerar_pdf_cco.py        # Gera o relatório PDF dark
+├── scripts/                   # Todos os scripts executáveis
+│   ├── 01_extracao_cco.py     # Lê e consolida os CSVs brutos
+│   ├── 02_limpeza_cco.py      # Limpa e valida os dados
+│   ├── 03_analise_cco.py      # Gera os 13 KPIs
+│   ├── 04_visualizacao_cco.py # Gera os 8 gráficos estáticos
+│   ├── 05_dashboard_cco.py    # Dashboard interativo
+│   ├── 06_machine_learning_cco.py  # Treina o modelo de ML
+│   └── 07_gerar_pdf_cco.py    # Gera o relatório PDF dark
+│
 ├── run_all.py                 # Roda tudo em ordem (01→07)
 │
 ├── dados_brutos/              # ← VOCÊ ALIMENTA AQUI
@@ -250,6 +248,7 @@ dados_cco/
 │
 ├── imagens/                   # Gerado automaticamente
 ├── modelo/                    # Gerado automaticamente
+├── tests/                     # Testes automatizados
 └── README.md
 ```
 
@@ -260,11 +259,11 @@ dados_cco/
 ## Fluxo resumido (cola no mural)
 
 ```
-1. Google Sheets → exporta 2 CSVs em CSV
+1. Exporta 2 CSVs em CSV
 2. Cria pasta dados_brutos/AAAA-MM/
 3. Salva os 2 CSVs dentro dela
 4. python3 run_all.py
-5. streamlit run 05_dashboard_cco.py
+5. streamlit run scripts/05_dashboard_cco.py
 ```
 
 Tempo total: **menos de 2 minutos**, contando a exportação.
@@ -278,4 +277,4 @@ Se o comportamento não for o esperado:
 1. Salve o print da tela e a saída completa do terminal
 2. Identifique qual script falhou (`01` a `07`)
 3. Abra o script correspondente e confira o trecho que processa o dado em questão
-4. Se for um caso novo (coluna com nome diferente, tipo de dado novo), ajuste o mapeamento no `02_limpeza_cco.py` e registre a mudança
+4. Se for um caso novo (coluna com nome diferente, tipo de dado novo), ajuste o mapeamento no `scripts/02_limpeza_cco.py` e registre a mudança
