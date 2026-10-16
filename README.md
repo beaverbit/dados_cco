@@ -1,6 +1,6 @@
 [![Tests](https://github.com/beaverbit/dados_cco/actions/workflows/tests.yml/badge.svg)](https://github.com/beaverbit/dados_cco/actions/workflows/tests.yml)
 
-# Pipeline de Indicadores Operacionais
+# Pipeline de dados para análise de conformidade operacional.
 
 Pipeline de dados para extração, limpeza, análise e visualização de registros de conformidade operacional. Processa planilhas de análise e não conformidades, gera KPIs, gráficos estáticos, dashboard interativo e relatório PDF.
 
