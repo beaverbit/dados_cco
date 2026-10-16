@@ -1,6 +1,4 @@
 # 05_dashboard_cco.py
-# Dashboard interativo do CCO com integração de ML.
-# Para rodar: streamlit run 05_dashboard_cco.py
 
 import streamlit as st
 import pandas as pd
@@ -21,7 +19,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ESTILO VISUAL (identidade Terceirize Mais)
+# ESTILO VISUAL
 st.markdown("""
 <style>
     .stApp {
