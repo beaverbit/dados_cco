@@ -1,9 +1,8 @@
-# Ambientes virtuais
+# Local de trabalho e máquina pessoal
+
 venv/
 env/
 .venv/
-
-# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -13,25 +12,17 @@ build/
 dist/
 *.egg-info/
 .pytest_cache/
-
-# Dados sensíveis da empresa (não versionar)
-dados_brutos/
-dados_tratados/
-
-# Modelo treinado (grande e regenerável)
 modelo/
-
-# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# Sistema
 .DS_Store
 Thumbs.db
-
-# Notebooks
 .ipynb_checkpoints/imagens/
 imagens/
+
+# Dados sensíveis (não versionar)
+dados_brutos/
+dados_tratados/
