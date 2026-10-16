@@ -1,5 +1,5 @@
 # run_all.py
-# Roda o pipeline completo do CCO em ordem.
+# Roda o pipeline completo em ordem.
 
 import subprocess
 import sys
