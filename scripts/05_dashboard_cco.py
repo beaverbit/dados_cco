@@ -168,7 +168,6 @@ def aplicar_tema(fig, altura=400):
         title_font=dict(color="#2C3E50", size=17),
         margin=dict(l=40, r=40, t=60, b=60),
     )
-    # Ajuste fino das linhas de grade
     fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#E9ECEF')
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#E9ECEF')
     return fig
@@ -260,7 +259,7 @@ fig1.add_trace(go.Bar(
     x=resumo_filial["filial"],
     y=resumo_filial["total"],
     name="Total de análises",
-    marker_color="#4C9F70", # Verde Marca
+    marker_color="#4C9F70", # MANTIDO VERDE
     yaxis="y1",
     text=resumo_filial["total"],
     textposition="outside",
@@ -272,7 +271,7 @@ fig1.add_trace(go.Scatter(
     y=resumo_filial["nc"],
     name="Total de NCs",
     mode="lines+markers",
-    marker=dict(color="#C0392B", size=10), # Vermelho Alerta
+    marker=dict(color="#C0392B", size=10), 
     line=dict(width=3),
     yaxis="y2",
     hovertemplate="%{x}<br>NCs: %{y}<extra></extra>",
@@ -302,7 +301,7 @@ resumo_conf = resumo_conf.sort_values("taxa_conformidade", ascending=False)
 fig2 = px.bar(
     resumo_conf, x="filial", y="taxa_conformidade",
     color="taxa_conformidade", 
-    color_continuous_scale="RdBu", # Azul para Vermelho (RdBu invertido para ficar Vermelho=baixo, Azul=alto)
+    color_continuous_scale="RdBu", # AZUL (alto) -> BRANCO -> VERMELHO (baixo)
     labels={"filial": "Filial", "taxa_conformidade": "Taxa de Conformidade (%)"},
     text="taxa_conformidade",
 )
@@ -328,7 +327,7 @@ resumo_mes = df_a_f.groupby("mes").agg(
 fig3 = go.Figure()
 fig3.add_trace(go.Bar(
     x=resumo_mes["mes"], y=resumo_mes["total"],
-    name="Análises", marker_color="#4C9F70",
+    name="Análises", marker_color="#4C9F70", # MANTIDO VERDE
     text=resumo_mes["total"],
     textposition="outside",
     textfont=dict(color="#2C3E50", size=12),
@@ -336,7 +335,7 @@ fig3.add_trace(go.Bar(
 ))
 fig3.add_trace(go.Bar(
     x=resumo_mes["mes"], y=resumo_mes["nc"],
-    name="NCs", marker_color="#C0392B",
+    name="NCs", marker_color="#C0392B", # VERMELHO (NCs)
     text=resumo_mes["nc"],
     textposition="outside",
     textfont=dict(color="#2C3E50", size=12),
@@ -379,7 +378,7 @@ fig4.add_trace(go.Bar(
     x=resumo_dia["dia_semana_pt"],
     y=resumo_dia["total"],
     name="Total de análises",
-    marker_color="#4C9F70",
+    marker_color="#4C9F70", # MANTIDO VERDE
     yaxis="y1",
     text=resumo_dia["total"],
     textposition="outside",
@@ -442,9 +441,10 @@ with col_d:
     resumo_class = df_a_f.groupby("classificacao").agg(total=("id_analise", "count")).reset_index()
 
     ordem_class = ["Ótimo", "Bom", "Regular", "Ruim", "Péssimo"]
-    # Escala Azul -> Vermelho
+    
+    # ESCALA DE CRITICIDADE: Azul -> Laranja -> Vermelho
     cores_class = {
-        "Ótimo": "#2E86C1",   # Azul forte
+        "Ótimo": "#1F618D",   # Azul escuro
         "Bom": "#85C1E9",     # Azul claro
         "Regular": "#F4D03F", # Amarelo
         "Ruim": "#E67E22",    # Laranja
@@ -550,9 +550,10 @@ if df_n_f is not None and len(df_n_f) > 0:
     resumo_cap = resumo_cap.assign(cap_int=resumo_cap["capitulo_nc"].astype(int))
     resumo_cap = resumo_cap.sort_values("cap_int")
 
+    # MANTIDO VERDE
     fig10 = px.bar(
         resumo_cap, x="capitulo_nc", y="total",
-        color="total", color_continuous_scale="Blues",
+        color="total", color_continuous_scale="Greens", 
         labels={"capitulo_nc": "Área", "total": "NCs"},
         text="total",
     )
@@ -584,7 +585,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     pivot = pivot.sort_values("total", ascending=False).drop(columns="total").reset_index()
 
     fig11 = go.Figure()
-    # Cores das gravidades: Azul -> Vermelho
+    # ESCALA DE GRAVIDADE: Azul -> Laranja -> Vermelho
     cores_grav = {
         "Baixa": "#85C1E9",   # Azul claro
         "Média": "#F4D03F",   # Amarelo
@@ -657,6 +658,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     pivot_cap = pivot_cap.reset_index().sort_values("capitulo_nc", key=lambda s: s.astype(int))
 
     fig13 = go.Figure()
+    # ESCALA DE GRAVIDADE: Azul -> Laranja -> Vermelho
     cores_grav = {
         "Baixa": "#85C1E9",   
         "Média": "#F4D03F",   
