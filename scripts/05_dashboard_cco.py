@@ -19,66 +19,76 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ESTILO VISUAL
+# ESTILO VISUAL - TEMA CLARO CORPORATIVO
 st.markdown("""
 <style>
+    /* Fundo Geral */
     .stApp {
-        background: #0E1117;
-        color: #E6E6E6;
+        background: #FFFFFF;
+        color: #2C3E50;
     }
 
+    /* Sidebar */
     [data-testid="stSidebar"] {
-        background: #161B22;
-        border-right: 1px solid #21262D;
+        background: #F8F9FA;
+        border-right: 1px solid #E9ECEF;
     }
     [data-testid="stSidebar"] * {
-        color: #C9D1D9;
+        color: #2C3E50;
     }
 
+    /* Títulos */
     h1 {
-        color: #4ADE80 !important;
+        color: #4C9F70 !important;
         font-weight: 700 !important;
         letter-spacing: -0.5px !important;
     }
 
     h2, h3 {
-        color: #F0F6FC !important;
+        color: #2C3E50 !important;
         font-weight: 600 !important;
         margin-top: 1.5rem !important;
     }
 
+    /* Cards de Métricas (KPIs) */
     [data-testid="stMetric"] {
-        background: #161B22;
-        border-left: 4px solid #2E7D32;
+        background: #F8F9FA;
+        border-left: 4px solid #4C9F70;
         border-radius: 6px;
         padding: 16px 20px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
     [data-testid="stMetricLabel"] {
-        color: #8B949E !important;
+        color: #7F8C8D !important;
         font-size: 0.85rem !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     [data-testid="stMetricValue"] {
-        color: #F0F6FC !important;
+        color: #2C3E50 !important;
         font-size: 1.9rem !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
     }
 
     hr {
-        border-color: #21262D !important;
+        border-color: #E9ECEF !important;
         margin: 2rem 0 !important;
     }
 
+    /* Inputs e Selects */
     [data-testid="stMultiSelect"] label {
-        color: #C9D1D9 !important;
-        font-weight: 500 !important;
+        color: #2C3E50 !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="stSelectbox"] label {
+        color: #2C3E50 !important;
+        font-weight: 600 !important;
     }
 
+    /* Botões */
     .stButton > button {
-        background: #2E7D32;
+        background: #4C9F70;
         color: #FFFFFF;
         border: none;
         font-weight: 600;
@@ -87,31 +97,29 @@ st.markdown("""
         transition: background 0.15s;
     }
     .stButton > button:hover {
-        background: #1B5E20;
+        background: #3B8259;
         color: #FFFFFF;
     }
 
+    /* Formulários */
     [data-testid="stForm"] {
-        background: #161B22;
-        border: 1px solid #21262D;
+        background: #F8F9FA;
+        border: 1px solid #E9ECEF;
         border-radius: 8px;
         padding: 1.5rem;
     }
 
-    [data-testid="stSelectbox"] label {
-        color: #C9D1D9 !important;
-        font-weight: 500 !important;
-    }
-
+    /* Textos de Legenda/Caption */
     .stCaption, [data-testid="stCaptionContainer"] {
-        color: #6E7681 !important;
+        color: #7F8C8D !important;
         font-size: 0.85rem !important;
     }
 
+    /* Alertas */
     .stAlert {
-        background: #161B22 !important;
-        border-left: 4px solid #F9A825 !important;
-        color: #C9D1D9 !important;
+        background: #F8F9FA !important;
+        border-left: 4px solid #F39C12 !important;
+        color: #2C3E50 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -154,12 +162,15 @@ def aplicar_tema(fig, altura=400):
     fig.update_layout(
         template=TEMPLATE,
         height=altura,
-        paper_bgcolor="#0E1117",
-        plot_bgcolor="#0E1117",
-        font=dict(color="#C9D1D9", size=13),
-        title_font=dict(color="#F0F6FC", size=17),
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FFFFFF",
+        font=dict(color="#2C3E50", size=13),
+        title_font=dict(color="#2C3E50", size=17),
         margin=dict(l=40, r=40, t=60, b=60),
     )
+    # Ajuste fino das linhas de grade
+    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#E9ECEF')
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#E9ECEF')
     return fig
 
 
@@ -170,9 +181,9 @@ modelo, encoders = carregar_modelo()
 st.title("CCO - Indicadores Operacionais")
 st.markdown(
     f"""
-    <div style="color:#607D8B; font-size:0.95rem; margin-bottom:1rem;">
-        <b style="color:#37474F;">Análises:</b> {len(df_a):,} &nbsp;&nbsp;|&nbsp;&nbsp;
-        <b style="color:#37474F;">Não conformidades:</b> {len(df_n) if df_n is not None else 0:,}
+    <div style="color:#7F8C8D; font-size:0.95rem; margin-bottom:1rem;">
+        <b style="color:#2C3E50;">Análises:</b> {len(df_a):,} &nbsp;&nbsp;|&nbsp;&nbsp;
+        <b style="color:#2C3E50;">Não conformidades:</b> {len(df_n) if df_n is not None else 0:,}
     </div>
     """,
     unsafe_allow_html=True,
@@ -215,8 +226,8 @@ if df_n is not None:
     df_n_f = df_n[df_n["id_analise"].isin(df_a_f["id_analise"])].copy()
 
 st.sidebar.markdown(
-    f"<div style='color:#607D8B; margin-top:1rem;'>Análises filtradas: "
-    f"<b style='color:#37474F;'>{len(df_a_f):,}</b></div>",
+    f"<div style='color:#7F8C8D; margin-top:1rem;'>Análises filtradas: "
+    f"<b style='color:#2C3E50;'>{len(df_a_f):,}</b></div>",
     unsafe_allow_html=True,
 )
 
@@ -249,11 +260,11 @@ fig1.add_trace(go.Bar(
     x=resumo_filial["filial"],
     y=resumo_filial["total"],
     name="Total de análises",
-    marker_color="#2E7D32",
+    marker_color="#4C9F70", # Verde Marca
     yaxis="y1",
     text=resumo_filial["total"],
     textposition="outside",
-    textfont=dict(color="#F0F6FC", size=12),
+    textfont=dict(color="#2C3E50", size=12),
     cliponaxis=False,
 ))
 fig1.add_trace(go.Scatter(
@@ -261,7 +272,7 @@ fig1.add_trace(go.Scatter(
     y=resumo_filial["nc"],
     name="Total de NCs",
     mode="lines+markers",
-    marker=dict(color="#C62828", size=10),
+    marker=dict(color="#C0392B", size=10), # Vermelho Alerta
     line=dict(width=3),
     yaxis="y2",
     hovertemplate="%{x}<br>NCs: %{y}<extra></extra>",
@@ -273,7 +284,7 @@ fig1.update_layout(
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
 aplicar_tema(fig1, 400)
-st.plotly_chart(fig1, width="stretch", theme=None)
+st.plotly_chart(fig1, use_container_width=True, theme=None)
 
 
 # ---------- Gráfico 2: Taxa de Conformidade por Filial ----------
@@ -290,19 +301,20 @@ resumo_conf = resumo_conf.sort_values("taxa_conformidade", ascending=False)
 
 fig2 = px.bar(
     resumo_conf, x="filial", y="taxa_conformidade",
-    color="taxa_conformidade", color_continuous_scale="RdYlGn",
+    color="taxa_conformidade", 
+    color_continuous_scale="RdBu", # Azul para Vermelho (RdBu invertido para ficar Vermelho=baixo, Azul=alto)
     labels={"filial": "Filial", "taxa_conformidade": "Taxa de Conformidade (%)"},
     text="taxa_conformidade",
 )
 fig2.update_traces(
     texttemplate="%{text:.1f}%",
     textposition="outside",
-    textfont=dict(color="#F0F6FC", size=12),
+    textfont=dict(color="#2C3E50", size=12),
     cliponaxis=False,
 )
 fig2.update_layout(coloraxis_showscale=False)
 aplicar_tema(fig2, 400)
-st.plotly_chart(fig2, width="stretch", theme=None)
+st.plotly_chart(fig2, use_container_width=True, theme=None)
 
 
 # ---------- Gráfico 3: Distribuição Mensal ----------
@@ -316,18 +328,18 @@ resumo_mes = df_a_f.groupby("mes").agg(
 fig3 = go.Figure()
 fig3.add_trace(go.Bar(
     x=resumo_mes["mes"], y=resumo_mes["total"],
-    name="Análises", marker_color="#2E7D32",
+    name="Análises", marker_color="#4C9F70",
     text=resumo_mes["total"],
     textposition="outside",
-    textfont=dict(color="#F0F6FC", size=12),
+    textfont=dict(color="#2C3E50", size=12),
     cliponaxis=False,
 ))
 fig3.add_trace(go.Bar(
     x=resumo_mes["mes"], y=resumo_mes["nc"],
-    name="NCs", marker_color="#C62828",
+    name="NCs", marker_color="#C0392B",
     text=resumo_mes["nc"],
     textposition="outside",
-    textfont=dict(color="#F0F6FC", size=12),
+    textfont=dict(color="#2C3E50", size=12),
     cliponaxis=False,
 ))
 fig3.update_layout(
@@ -337,7 +349,7 @@ fig3.update_layout(
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
 aplicar_tema(fig3, 400)
-st.plotly_chart(fig3, width="stretch", theme=None)
+st.plotly_chart(fig3, use_container_width=True, theme=None)
 
 
 # ---------- Gráfico 4: Dia da Semana ----------
@@ -367,11 +379,11 @@ fig4.add_trace(go.Bar(
     x=resumo_dia["dia_semana_pt"],
     y=resumo_dia["total"],
     name="Total de análises",
-    marker_color="#2E7D32",
+    marker_color="#4C9F70",
     yaxis="y1",
     text=resumo_dia["total"],
     textposition="outside",
-    textfont=dict(color="#F0F6FC", size=12),
+    textfont=dict(color="#2C3E50", size=12),
     cliponaxis=False,
 ))
 fig4.add_trace(go.Scatter(
@@ -379,7 +391,7 @@ fig4.add_trace(go.Scatter(
     y=resumo_dia["taxa_nc"],
     name="Taxa de NC (%)",
     mode="lines+markers",
-    marker=dict(color="#C62828", size=8),
+    marker=dict(color="#C0392B", size=8),
     line=dict(width=3),
     yaxis="y2",
     hovertemplate="%{x}<br>Taxa NC: %{y:.1f}%<extra></extra>",
@@ -391,7 +403,7 @@ fig4.update_layout(
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
 aplicar_tema(fig4, 400)
-st.plotly_chart(fig4, width="stretch", theme=None)
+st.plotly_chart(fig4, use_container_width=True, theme=None)
 
 
 # ---------- Gráficos 5 e 6: Resultado e Classificação (lado a lado) ----------
@@ -404,9 +416,9 @@ with col_c:
     ).reset_index()
 
     cores_resultado = {
-        "Conforme": "#2E7D32",
-        "Conforme com Observação": "#F9A825",
-        "Não Conforme": "#C62828",
+        "Conforme": "#4C9F70",
+        "Conforme com Observação": "#F39C12",
+        "Não Conforme": "#C0392B",
     }
 
     fig5 = px.bar(
@@ -418,24 +430,25 @@ with col_c:
     )
     fig5.update_traces(
         textposition="outside",
-        textfont=dict(color="#F0F6FC", size=13),
+        textfont=dict(color="#2C3E50", size=13),
         cliponaxis=False,
     )
     fig5.update_layout(showlegend=False)
     aplicar_tema(fig5, 400)
-    st.plotly_chart(fig5, width="stretch", theme=None)
+    st.plotly_chart(fig5, use_container_width=True, theme=None)
 
 with col_d:
     st.subheader("Distribuição por Classificação")
     resumo_class = df_a_f.groupby("classificacao").agg(total=("id_analise", "count")).reset_index()
 
     ordem_class = ["Ótimo", "Bom", "Regular", "Ruim", "Péssimo"]
+    # Escala Azul -> Vermelho
     cores_class = {
-        "Ótimo": "#2E7D32",
-        "Bom": "#66BB6A",
-        "Regular": "#F9A825",
-        "Ruim": "#EF6C00",
-        "Péssimo": "#C62828",
+        "Ótimo": "#2E86C1",   # Azul forte
+        "Bom": "#85C1E9",     # Azul claro
+        "Regular": "#F4D03F", # Amarelo
+        "Ruim": "#E67E22",    # Laranja
+        "Péssimo": "#C0392B", # Vermelho
     }
 
     fig6 = px.pie(
@@ -452,7 +465,7 @@ with col_d:
         insidetextorientation="radial",
     )
     aplicar_tema(fig6, 400)
-    st.plotly_chart(fig6, width="stretch", theme=None)
+    st.plotly_chart(fig6, use_container_width=True, theme=None)
 
 
 # ---------- Gráfico 7: Unidades com Maior Incidência (sem números) ----------
@@ -476,7 +489,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     )
     fig7.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig7, 500)
-    st.plotly_chart(fig7, width="stretch", theme=None)
+    st.plotly_chart(fig7, use_container_width=True, theme=None)
 
 
 # ---------- Gráfico 8: NCs por Gravidade ----------
@@ -496,12 +509,12 @@ if df_n_f is not None and len(df_n_f) > 0:
     fig8.update_traces(
         texttemplate="%{text:,}",
         textposition="outside",
-        textfont=dict(color="#F0F6FC", size=13),
+        textfont=dict(color="#2C3E50", size=13),
         cliponaxis=False,
     )
     fig8.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig8, 400)
-    st.plotly_chart(fig8, width="stretch", theme=None)
+    st.plotly_chart(fig8, use_container_width=True, theme=None)
 
 
 # ---------- Gráfico 9: Itens com Maior Reincidência (sem números) ----------
@@ -524,7 +537,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     )
     fig9.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig9, 900)
-    st.plotly_chart(fig9, width="stretch", theme=None)
+    st.plotly_chart(fig9, use_container_width=True, theme=None)
 
 
 # ---------- Gráfico 10: NCs por Área ----------
@@ -539,19 +552,19 @@ if df_n_f is not None and len(df_n_f) > 0:
 
     fig10 = px.bar(
         resumo_cap, x="capitulo_nc", y="total",
-        color="total", color_continuous_scale="Greens",
+        color="total", color_continuous_scale="Blues",
         labels={"capitulo_nc": "Área", "total": "NCs"},
         text="total",
     )
     fig10.update_traces(
         texttemplate="%{text:,}",
         textposition="outside",
-        textfont=dict(color="#F0F6FC", size=13),
+        textfont=dict(color="#2C3E50", size=13),
         cliponaxis=False,
     )
     fig10.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig10, 400)
-    st.plotly_chart(fig10, width="stretch", theme=None)
+    st.plotly_chart(fig10, use_container_width=True, theme=None)
 
 
 # ---------- Gráfico 11: Filial x Gravidade (sem números dentro) ----------
@@ -571,11 +584,12 @@ if df_n_f is not None and len(df_n_f) > 0:
     pivot = pivot.sort_values("total", ascending=False).drop(columns="total").reset_index()
 
     fig11 = go.Figure()
+    # Cores das gravidades: Azul -> Vermelho
     cores_grav = {
-        "Baixa": "#2E7D32",
-        "Média": "#F9A825",
-        "Alta": "#EF6C00",
-        "Crítica": "#C62828",
+        "Baixa": "#85C1E9",   # Azul claro
+        "Média": "#F4D03F",   # Amarelo
+        "Alta": "#E67E22",    # Laranja
+        "Crítica": "#C0392B", # Vermelho
     }
     for g in ordem_grav:
         fig11.add_trace(go.Bar(
@@ -590,7 +604,7 @@ if df_n_f is not None and len(df_n_f) > 0:
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
     aplicar_tema(fig11, 500)
-    st.plotly_chart(fig11, width="stretch", theme=None)
+    st.plotly_chart(fig11, use_container_width=True, theme=None)
 
 
 # ---------- Gráfico 12: NCs por Dia da Semana ----------
@@ -612,19 +626,19 @@ if df_n_f is not None and len(df_n_f) > 0 and "dia_semana" in df_a_f.columns:
 
     fig12 = px.bar(
         resumo_nc_dia, x="dia_semana_pt", y="total",
-        color="total", color_continuous_scale="Reds",
+        color="total", color_continuous_scale="Blues",
         labels={"dia_semana_pt": "Dia", "total": "NCs"},
         text="total",
     )
     fig12.update_traces(
         texttemplate="%{text:,}",
         textposition="outside",
-        textfont=dict(color="#F0F6FC", size=12),
+        textfont=dict(color="#2C3E50", size=12),
         cliponaxis=False,
     )
     fig12.update_layout(coloraxis_showscale=False)
     aplicar_tema(fig12, 400)
-    st.plotly_chart(fig12, width="stretch", theme=None)
+    st.plotly_chart(fig12, use_container_width=True, theme=None)
 
 
 # ---------- Gráfico 13: Gravidade das NCs por Área (sem números dentro) ----------
@@ -644,10 +658,10 @@ if df_n_f is not None and len(df_n_f) > 0:
 
     fig13 = go.Figure()
     cores_grav = {
-        "Baixa": "#2E7D32",
-        "Média": "#F9A825",
-        "Alta": "#EF6C00",
-        "Crítica": "#C62828",
+        "Baixa": "#85C1E9",   
+        "Média": "#F4D03F",   
+        "Alta": "#E67E22",    
+        "Crítica": "#C0392B", 
     }
     for g in ordem_grav:
         fig13.add_trace(go.Bar(
@@ -662,7 +676,7 @@ if df_n_f is not None and len(df_n_f) > 0:
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
     aplicar_tema(fig13, 400)
-    st.plotly_chart(fig13, width="stretch", theme=None)
+    st.plotly_chart(fig13, use_container_width=True, theme=None)
 
 
 st.divider()
@@ -677,7 +691,7 @@ st.markdown(
 
 if modelo is None or encoders is None:
     st.warning(
-        "Modelo não encontrado. Rode `python3 06_machine_learning_cco.py` "
+        "Modelo não encontrado. Rode `python3 scripts/06_machine_learning_cco.py` "
         "para gerar os arquivos `modelo/modelo_cco.pkl` e `modelo/encoders_cco.pkl`."
     )
 else:
@@ -704,7 +718,7 @@ else:
                 options=sorted(df_n["capitulo_nc"].dropna().unique().tolist()),
             )
 
-        submit = st.form_submit_button("Prever Criticidade", width="stretch")
+        submit = st.form_submit_button("Prever Criticidade", use_container_width=True)
 
     if submit:
         try:
@@ -739,22 +753,22 @@ else:
             st.markdown("### Resultado da Previsão")
 
             cores = {
-                "Crítica": "#C62828",
-                "Outra": "#2E7D32",
+                "Crítica": "#C0392B",
+                "Outra": "#4C9F70",
             }
 
-            cor = cores.get(classe_prevista, "#607D8B")
+            cor = cores.get(classe_prevista, "#7F8C8D")
 
             st.markdown(
                 f"""
                 <div style="
-                    background-color: #ECEFF1;
+                    background-color: #F8F9FA;
                     border-left: 6px solid {cor};
                     padding: 20px;
                     border-radius: 6px;
                     margin: 10px 0;
                 ">
-                    <div style="color: #607D8B; font-size: 0.85rem;
+                    <div style="color: #7F8C8D; font-size: 0.85rem;
                                 text-transform: uppercase; letter-spacing: 0.5px;
                                 margin-bottom: 4px;">
                         Classificação prevista
@@ -780,18 +794,18 @@ else:
                 y="Classe",
                 orientation="h",
                 color="Probabilidade (%)",
-                color_continuous_scale="Reds",
+                color_continuous_scale="Blues",
                 text="Probabilidade (%)",
             )
             fig_pred.update_traces(
                 texttemplate="%{text:.1f}%",
                 textposition="outside",
-                textfont=dict(color="#F0F6FC", size=12),
+                textfont=dict(color="#2C3E50", size=12),
                 cliponaxis=False,
             )
             fig_pred.update_layout(showlegend=False, coloraxis_showscale=False)
             aplicar_tema(fig_pred, 300)
-            st.plotly_chart(fig_pred, width="stretch", theme=None)
+            st.plotly_chart(fig_pred, use_container_width=True, theme=None)
 
             st.caption(
                 "Esta previsão é baseada em padrões estatísticos históricos e "
