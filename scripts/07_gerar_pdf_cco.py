@@ -1,5 +1,5 @@
 # 07_gerar_pdf_cco.py
-# Meu objetivo: gerar um PDF do dashboard com a mesma paleta visual do Streamlit (Tema Claro Corporativo).
+# Meu objetivo: gerar um PDF do dashboard com a mesma paleta visual do Streamlit.
 
 import pandas as pd
 import plotly.express as px
@@ -25,7 +25,7 @@ ARQ_ANALISES = os.path.join(BASE_DIR, "dados_tratados", "analises_limpas.csv")
 ARQ_NCS = os.path.join(BASE_DIR, "dados_tratados", "nao_conformidades_limpas.csv")
 ARQ_PDF = os.path.join(BASE_DIR, "dados_tratados", "relatorio_cco.pdf")
 
-# Paleta Corporativa (idêntica ao dashboard atualizado)
+# Paleta Corporativa (ReportLab)
 VERDE = HexColor("#4C9F70")
 VERDE_ESCURO = HexColor("#3B8259")
 CINZA_TEXTO = HexColor("#2C3E50")
@@ -33,14 +33,15 @@ CINZA_CLARO = HexColor("#7F8C8D")
 CINZA_BG = HexColor("#F8F9FA")
 CINZA_BORDA = HexColor("#E9ECEF")
 
-# Cores pro Plotly (em hex string)
+# Cores pro Plotly (em string HEX)
 PLOTLY_BG = "#FFFFFF"
-PLOTLY_VERDE = "#4C9F70"
-PLOTLY_AZUL_ESCURO = "#2E86C1"
-PLOTLY_AZUL_CLARO = "#85C1E9"
-PLOTLY_AMARELO = "#F4D03F"
-PLOTLY_LARANJA = "#E67E22"
-PLOTLY_VERMELHO = "#C0392B"
+PLOTLY_VERDE_ESCURO = "#2E7D32"
+PLOTLY_VERDE_CLARO = "#A5D6A7"
+PLOTLY_AMARELO = "#F9A825"
+PLOTLY_LARANJA = "#EF6C00"
+PLOTLY_VERMELHO = "#C62828"
+PLOTLY_TEXTO = "#2C3E50"
+COR_BORDA = "#B0BEC5"
 
 TEMPLATE = "plotly_white"
 
@@ -55,6 +56,11 @@ def carregar_dados():
     df_a = df_a.assign(
         data_da_avaliacao=pd.to_datetime(df_a["data_da_avaliacao"], errors="coerce")
     )
+    
+    # AQUI ESTÁ O SEGREDO: Ignora as análises sem resultado (não finalizadas)
+    # Exatamente igual ao dashboard faz com o .isin()
+    df_a = df_a[df_a["resultado"].notna()].reset_index(drop=True)
+    
     df_n = None
     if os.path.exists(ARQ_NCS):
         df_n = pd.read_csv(ARQ_NCS, sep=";", encoding="utf-8", low_memory=False)
@@ -67,12 +73,12 @@ def aplicar_tema(fig, altura=400):
         height=altura,
         paper_bgcolor=PLOTLY_BG,
         plot_bgcolor=PLOTLY_BG,
-        font=dict(color=CINZA_TEXTO, size=13),
-        title_font=dict(color=CINZA_TEXTO, size=17),
+        font=dict(color=PLOTLY_TEXTO, size=13),
+        title_font=dict(color=PLOTLY_TEXTO, size=17),
         margin=dict(l=40, r=40, t=60, b=60),
     )
-    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor=CINZA_BORDA)
-    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor=CINZA_BORDA)
+    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#E9ECEF')
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#E9ECEF')
     return fig
 
 
@@ -103,19 +109,26 @@ def estilos():
 
 
 def desenhar_faixa_titulo(canvas, doc, titulo):
-    """Desenha a faixa verde corporativa no topo da página."""
     canvas.saveState()
-    
-    # Faixa verde
     canvas.setFillColor(VERDE)
     canvas.rect(0, doc.pagesize[1] - 2.5*cm, doc.pagesize[0], 2.5*cm, fill=1, stroke=0)
-    
-    # Texto da faixa
     canvas.setFillColor(HexColor("#FFFFFF"))
     canvas.setFont("Helvetica-Bold", 18)
     canvas.drawString(2*cm, doc.pagesize[1] - 1.5*cm, titulo)
-    
     canvas.restoreState()
+
+
+def kpis(df_a):
+    total = len(df_a)
+    conformes = (df_a["resultado"].str.lower() == "conforme").sum()
+    nao_conf = (df_a["resultado"].str.lower() == "não conforme").sum()
+    taxa = (nao_conf / total * 100) if total else 0
+    return [
+        ("TOTAL DE ANÁLISES", f"{total:,}"),
+        ("ANÁLISES CONFORMES", f"{conformes:,}"),
+        ("ANÁLISES NÃO CONFORMES", f"{nao_conf:,}"),
+        ("TAXA DE NÃO CONFORMIDADE", f"{taxa:.2f}%"),
+    ]
 
 
 # ============================================================
@@ -128,8 +141,8 @@ def g1_analises_filial(df_a):
     fig = go.Figure()
     fig.add_trace(go.Bar(
         x=resumo["filial"], y=resumo["total"], name="Análises",
-        marker_color=PLOTLY_VERDE, text=resumo["total"], textposition="outside",
-        textfont=dict(color=CINZA_TEXTO, size=12), cliponaxis=False,
+        marker_color=PLOTLY_VERDE_ESCURO, text=resumo["total"], textposition="outside",
+        textfont=dict(color=PLOTLY_TEXTO, size=12), cliponaxis=False,
     ))
     fig.add_trace(go.Scatter(
         x=resumo["filial"], y=resumo["nc"], name="NCs",
@@ -151,10 +164,14 @@ def g2_taxa_conformidade(df_a):
 
     fig = px.bar(
         resumo, x="filial", y="taxa",
-        color="taxa", color_continuous_scale="RdBu",
+        color="taxa", color_continuous_scale="Greens", 
         labels={"filial": "Filial", "taxa": "Taxa de Conformidade (%)"}, text="taxa",
     )
-    fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside", textfont=dict(color=CINZA_TEXTO, size=12), cliponaxis=False)
+    fig.update_traces(
+        texttemplate="%{text:.1f}%", textposition="outside", 
+        textfont=dict(color=PLOTLY_TEXTO, size=12), cliponaxis=False,
+        marker_line_color=COR_BORDA, marker_line_width=1
+    )
     fig.update_layout(coloraxis_showscale=False)
     return aplicar_tema(fig, 400)
 
@@ -164,12 +181,16 @@ def g3_distribuicao_mes(df_a):
 
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        x=resumo["mes"], y=resumo["total"], name="Análises", marker_color=PLOTLY_VERDE,
-        text=resumo["total"], textposition="outside", textfont=dict(color=CINZA_TEXTO, size=12), cliponaxis=False,
+        x=resumo["mes"], y=resumo["total"], name="Análises", 
+        marker_color=PLOTLY_VERDE_ESCURO,
+        marker_line_color=COR_BORDA, marker_line_width=1,
+        text=resumo["total"], textposition="outside", textfont=dict(color=PLOTLY_TEXTO, size=12), cliponaxis=False,
     ))
     fig.add_trace(go.Bar(
-        x=resumo["mes"], y=resumo["nc"], name="NCs", marker_color=PLOTLY_VERMELHO,
-        text=resumo["nc"], textposition="outside", textfont=dict(color=CINZA_TEXTO, size=12), cliponaxis=False,
+        x=resumo["mes"], y=resumo["nc"], name="NCs", 
+        marker_color=PLOTLY_VERMELHO,
+        marker_line_color=COR_BORDA, marker_line_width=1,
+        text=resumo["nc"], textposition="outside", textfont=dict(color=PLOTLY_TEXTO, size=12), cliponaxis=False,
     ))
     fig.update_layout(
         barmode="group", xaxis_title="Mês", yaxis_title="Quantidade",
@@ -188,8 +209,10 @@ def g4_dia_semana(df_a):
 
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        x=resumo["dia"], y=resumo["total"], name="Análises", marker_color=PLOTLY_VERDE,
-        text=resumo["total"], textposition="outside", textfont=dict(color=CINZA_TEXTO, size=12), cliponaxis=False,
+        x=resumo["dia"], y=resumo["total"], name="Análises", 
+        marker_color=PLOTLY_VERDE_ESCURO,
+        marker_line_color=COR_BORDA, marker_line_width=1,
+        text=resumo["total"], textposition="outside", textfont=dict(color=PLOTLY_TEXTO, size=12), cliponaxis=False,
     ))
     fig.add_trace(go.Scatter(
         x=resumo["dia"], y=resumo["taxa"], name="Taxa NC (%)",
@@ -205,12 +228,15 @@ def g4_dia_semana(df_a):
 
 def g5_resultado(df_a):
     resumo = df_a.groupby("resultado").agg(total=("id_analise", "count")).reset_index()
-    cores = {"Conforme": PLOTLY_VERDE, "Conforme com Observação": PLOTLY_AMARELO, "Não Conforme": PLOTLY_VERMELHO}
+    cores = {"Conforme": PLOTLY_VERDE_ESCURO, "Conforme com Observação": PLOTLY_AMARELO, "Não Conforme": PLOTLY_VERMELHO}
     fig = px.bar(
         resumo, x="resultado", y="total", color="resultado", color_discrete_map=cores,
         labels={"resultado": "Resultado", "total": "Análises"}, text="total",
     )
-    fig.update_traces(textposition="outside", textfont=dict(color=CINZA_TEXTO, size=13), cliponaxis=False)
+    fig.update_traces(
+        textposition="outside", textfont=dict(color=PLOTLY_TEXTO, size=13), cliponaxis=False,
+        marker_line_color=COR_BORDA, marker_line_width=1
+    )
     fig.update_layout(showlegend=False)
     return aplicar_tema(fig, 400)
 
@@ -218,7 +244,15 @@ def g5_resultado(df_a):
 def g6_classificacao(df_a):
     resumo = df_a.groupby("classificacao").agg(total=("id_analise", "count")).reset_index()
     ordem = ["Ótimo", "Bom", "Regular", "Ruim", "Péssimo"]
-    cores = {"Ótimo": PLOTLY_AZUL_ESCURO, "Bom": PLOTLY_AZUL_CLARO, "Regular": PLOTLY_AMARELO, "Ruim": PLOTLY_LARANJA, "Péssimo": PLOTLY_VERMELHO}
+    
+    # VERDE, AMARELO, LARANJA, VERMELHO
+    cores = {
+        "Ótimo": PLOTLY_VERDE_ESCURO, 
+        "Bom": PLOTLY_VERDE_CLARO, 
+        "Regular": PLOTLY_AMARELO, 
+        "Ruim": PLOTLY_LARANJA, 
+        "Péssimo": PLOTLY_VERMELHO
+    }
     fig = px.pie(
         resumo, names="classificacao", values="total", color="classificacao", color_discrete_map=cores,
         category_orders={"classificacao": ordem}, hole=0.4,
@@ -232,22 +266,39 @@ def g7_top_unidades(df_n):
     resumo = resumo.assign(codigo_unidade=resumo["codigo_unidade"].apply(lambda x: f"Unidade {int(x)}" if pd.notna(x) else "Sem unidade"))
 
     fig = px.bar(
-        resumo, x="total", y="codigo_unidade", orientation="h", color="total", color_continuous_scale="Reds",
+        resumo, x="total", y="codigo_unidade", orientation="h", 
+        color="total", color_continuous_scale="Greens",
         labels={"total": "NCs", "codigo_unidade": ""}, text="total",
     )
-    fig.update_traces(texttemplate="%{text:,}", textposition="outside", textfont=dict(color=CINZA_TEXTO, size=11), cliponaxis=False)
+    # Adiciona contorno nas barras (para as brancas aparecerem)
+    fig.update_traces(
+        texttemplate="%{text:,}", textposition="outside", textfont=dict(color=PLOTLY_TEXTO, size=11), cliponaxis=False,
+        marker_line_color=COR_BORDA, marker_line_width=1
+    )
     fig.update_layout(coloraxis_showscale=False)
     return aplicar_tema(fig, 500)
 
 
 def g8_gravidade(df_n):
     resumo = df_n.groupby("gravidade").agg(total=("codigo_nc", "count")).reset_index().sort_values("total", ascending=False)
+    
+    # VERMELHO, LARANJA, AMARELO, VERDE
+    cores_grav = {
+        "Crítica": PLOTLY_VERMELHO, 
+        "Alta": PLOTLY_LARANJA,    
+        "Média": PLOTLY_AMARELO,   
+        "Baixa": PLOTLY_VERDE_ESCURO,   
+    }
+    
     fig = px.bar(
-        resumo, x="gravidade", y="total", color="total", color_continuous_scale="Reds",
+        resumo, x="gravidade", y="total", color="gravidade", color_discrete_map=cores_grav,
         labels={"gravidade": "Gravidade", "total": "NCs"}, text="total",
     )
-    fig.update_traces(texttemplate="%{text:,}", textposition="outside", textfont=dict(color=CINZA_TEXTO, size=13), cliponaxis=False)
-    fig.update_layout(coloraxis_showscale=False)
+    fig.update_traces(
+        texttemplate="%{text:,}", textposition="outside", textfont=dict(color=PLOTLY_TEXTO, size=13), cliponaxis=False,
+        marker_line_color=COR_BORDA, marker_line_width=1
+    )
+    fig.update_layout(showlegend=False)
     return aplicar_tema(fig, 400)
 
 
@@ -256,10 +307,14 @@ def g9_top_codigos(df_n):
     resumo = resumo.assign(codigo_nc=resumo["codigo_nc"].apply(lambda x: f"Item {x}")).sort_values("total", ascending=True)
 
     fig = px.bar(
-        resumo, x="total", y="codigo_nc", orientation="h", color="total", color_continuous_scale="Reds",
+        resumo, x="total", y="codigo_nc", orientation="h", 
+        color="total", color_continuous_scale="Greens",
         labels={"total": "NCs", "codigo_nc": ""}, text="total",
     )
-    fig.update_traces(texttemplate="%{text:,}", textposition="outside", textfont=dict(color=CINZA_TEXTO, size=10), cliponaxis=False)
+    fig.update_traces(
+        texttemplate="%{text:,}", textposition="outside", textfont=dict(color=PLOTLY_TEXTO, size=10), cliponaxis=False,
+        marker_line_color=COR_BORDA, marker_line_width=1
+    )
     fig.update_layout(coloraxis_showscale=False)
     return aplicar_tema(fig, 500)
 
@@ -268,16 +323,19 @@ def g10_nc_area(df_n):
     resumo = df_n.groupby("capitulo_nc").agg(total=("codigo_nc", "count")).reset_index()
     resumo = resumo.assign(cap_int=resumo["capitulo_nc"].astype(int)).sort_values("cap_int")
     fig = px.bar(
-        resumo, x="capitulo_nc", y="total", color="total", color_continuous_scale="Blues",
+        resumo, x="capitulo_nc", y="total", color="total", color_continuous_scale="Greens",
         labels={"capitulo_nc": "Área", "total": "NCs"}, text="total",
     )
-    fig.update_traces(texttemplate="%{text:,}", textposition="outside", textfont=dict(color=CINZA_TEXTO, size=13), cliponaxis=False)
+    fig.update_traces(
+        texttemplate="%{text:,}", textposition="outside", textfont=dict(color=PLOTLY_TEXTO, size=13), cliponaxis=False,
+        marker_line_color=COR_BORDA, marker_line_width=1
+    )
     fig.update_layout(coloraxis_showscale=False)
     return aplicar_tema(fig, 400)
 
 
 def g11_filial_gravidade(df_n):
-    ordem = ["Baixa", "Média", "Alta", "Crítica"]
+    ordem = ["Crítica", "Alta", "Média", "Baixa"]
     pivot = df_n.pivot_table(index="filial", columns="gravidade", values="codigo_nc", aggfunc="count", fill_value=0)
     for g in ordem:
         if g not in pivot.columns:
@@ -285,10 +343,20 @@ def g11_filial_gravidade(df_n):
     pivot = pivot[ordem].assign(total=pivot[ordem].sum(axis=1)).sort_values("total", ascending=False).drop(columns="total").reset_index()
 
     fig = go.Figure()
-    cores = {"Baixa": PLOTLY_AZUL_CLARO, "Média": PLOTLY_AMARELO, "Alta": PLOTLY_LARANJA, "Crítica": PLOTLY_VERMELHO}
+    
+    # VERMELHO, LARANJA, AMARELO, VERDE
+    cores = {
+        "Crítica": PLOTLY_VERMELHO, 
+        "Alta": PLOTLY_LARANJA,    
+        "Média": PLOTLY_AMARELO,   
+        "Baixa": PLOTLY_VERDE_ESCURO,   
+    }
+    
     for g in ordem:
         fig.add_trace(go.Bar(
-            y=pivot["filial"], x=pivot[g], name=g, orientation="h", marker_color=cores[g],
+            y=pivot["filial"], x=pivot[g], name=g, orientation="h", 
+            marker_color=cores[g],
+            marker_line_color=COR_BORDA, marker_line_width=1,
             text=pivot[g], textposition="inside", insidetextanchor="middle", textfont=dict(color="#FFFFFF", size=11),
         ))
     fig.update_layout(
@@ -306,16 +374,19 @@ def g12_nc_dia_semana(df_a, df_n):
     resumo = resumo.assign(ordem=resumo["dia"].map({v: i for i, v in enumerate(["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"])})).sort_values("ordem")
 
     fig = px.bar(
-        resumo, x="dia", y="total", color="total", color_continuous_scale="Blues",
+        resumo, x="dia", y="total", color="total", color_continuous_scale="Greens",
         labels={"dia": "Dia", "total": "NCs"}, text="total",
     )
-    fig.update_traces(texttemplate="%{text:,}", textposition="outside", textfont=dict(color=CINZA_TEXTO, size=12), cliponaxis=False)
+    fig.update_traces(
+        texttemplate="%{text:,}", textposition="outside", textfont=dict(color=PLOTLY_TEXTO, size=12), cliponaxis=False,
+        marker_line_color=COR_BORDA, marker_line_width=1
+    )
     fig.update_layout(coloraxis_showscale=False)
     return aplicar_tema(fig, 400)
 
 
 def g13_gravidade_area(df_n):
-    ordem = ["Baixa", "Média", "Alta", "Crítica"]
+    ordem = ["Crítica", "Alta", "Média", "Baixa"]
     pivot = df_n.pivot_table(index="capitulo_nc", columns="gravidade", values="codigo_nc", aggfunc="count", fill_value=0)
     for g in ordem:
         if g not in pivot.columns:
@@ -323,10 +394,20 @@ def g13_gravidade_area(df_n):
     pivot = pivot[ordem].reset_index().sort_values("capitulo_nc", key=lambda s: s.astype(int))
 
     fig = go.Figure()
-    cores = {"Baixa": PLOTLY_AZUL_CLARO, "Média": PLOTLY_AMARELO, "Alta": PLOTLY_LARANJA, "Crítica": PLOTLY_VERMELHO}
+    
+    # VERMELHO, LARANJA, AMARELO, VERDE
+    cores = {
+        "Crítica": PLOTLY_VERMELHO, 
+        "Alta": PLOTLY_LARANJA,    
+        "Média": PLOTLY_AMARELO,   
+        "Baixa": PLOTLY_VERDE_ESCURO,   
+    }
+    
     for g in ordem:
         fig.add_trace(go.Bar(
-            x=pivot["capitulo_nc"], y=pivot[g], name=g, marker_color=cores[g],
+            x=pivot["capitulo_nc"], y=pivot[g], name=g, 
+            marker_color=cores[g],
+            marker_line_color=COR_BORDA, marker_line_width=1,
             text=pivot[g], textposition="inside", insidetextanchor="middle", textfont=dict(color="#FFFFFF", size=11),
         ))
     fig.update_layout(
@@ -364,12 +445,10 @@ def gerar_pdf():
         imagens["g13"] = fig_para_imagem(g13_gravidade_area(df_n), 1200, 450)
 
     print("Montando PDF...")
-    
-    # Criando o documento
     doc = SimpleDocTemplate(
         ARQ_PDF, pagesize=A4,
         leftMargin=2 * cm, rightMargin=2 * cm,
-        topMargin=3.5 * cm, bottomMargin=1.5 * cm, # Aumentei o topo para caber a faixa verde
+        topMargin=3.5 * cm, bottomMargin=1.5 * cm,
     )
 
     historia = []
@@ -380,7 +459,6 @@ def gerar_pdf():
     historia.append(Paragraph(f"Relatório gerado em {datetime.now().strftime('%d/%m/%Y às %H:%M')}", est["caption"]))
     historia.append(Spacer(1, 1.5 * cm))
     
-    # KPI Cards formatados como tabela
     tabela = Table(
         [[k, v] for k, v in kpis(df_a)],
         colWidths=[8 * cm, 5 * cm],
@@ -399,22 +477,11 @@ def gerar_pdf():
         ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
         ("LINEBELOW", (0, 0), (-1, -2), 1, CINZA_BORDA),
         ("BOX", (0, 0), (-1, -1), 1, CINZA_BORDA),
-        # Detalhe verde na esquerda de cada KPI
         ("LINEBEFORE", (0, 0), (0, -1), 4, VERDE),
     ]))
     historia.append(tabela)
     
     # --- Páginas de Gráficos ---
-    
-    # Definindo os títulos que vão na faixa verde de cada página
-    titulos_paginas = [
-        "Análise Geral e Filiais",
-        "Volume Mensal e Diário",
-        "Resultados e Classificações",
-        "Detalhamento de Não Conformidades",
-        "Unidades e Checklist",
-        "Gravidade por Área e Filial"
-    ]
     
     def secao(titulo, img_key):
         bloco = [
@@ -435,7 +502,6 @@ def gerar_pdf():
         ]
         return KeepTogether(bloco)
 
-    # Lista de páginas e seus conteúdos
     paginas_conteudo = [
         # Página 1
         secao_dupla("Análises e NCs por Filial", "g1", "Taxa de Conformidade por Filial", "g2"),
@@ -451,27 +517,15 @@ def gerar_pdf():
         secao_dupla("NCs Registradas por Dia da Semana", "g12", "Gravidade das NCs por Área", "g13"),
     ]
 
-    # Monta o PDF iterando as páginas
     for i, conteudo in enumerate(paginas_conteudo):
         historia.append(PageBreak())
-        
-        # O onPage desenha a faixa verde no topo. Precisamos passar o título específico.
-        # Como o SimpleDocTemplate onPage é genérico, vamos usar um truque: desenhamos no build final.
-        
         if isinstance(conteudo, list):
             historia.extend(conteudo)
         else:
             historia.append(conteudo)
 
-    # Como o ReportLab não facilita trocar o onPage dinamicamente, 
-    # vamos usar o parâmetro onLaterPages com uma função que lê um arquivo temporário ou variável global.
-    # Mas para manter simples e à prova de falhas, vou desenhar a faixa estática em todas.
-    # Para dar o efeito, o título do gráfico fica dentro do bloco da tabela já.
-    # A faixa verde servirá para enquadrar.
-
     def on_page(canvas, doc):
         desenhar_faixa_titulo(canvas, doc, "CCO - INDICADORES OPERACIONAIS")
-        # Rodapé
         canvas.saveState()
         canvas.setFillColor(CINZA_CLARO)
         canvas.setFont("Helvetica", 8)
