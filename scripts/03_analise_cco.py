@@ -269,14 +269,24 @@ def kpi_nc_por_analista(df_n):
 
 
 def salvar(resultados):
-    with open(ARQ_SAIDA, "w", encoding="utf-8") as f:
-        for nome, tabela in resultados.items():
-            if tabela is None:
-                continue
-            f.write(f"\n===== {nome} =====\n")
-            f.write(tabela.to_csv(index=False, sep=";"))
-            f.write("\n")
-    print(f"\nSalvei resultados em: {ARQ_SAIDA}")
+    # Cria uma pasta só para os KPIs, para não misturar com os dados limpos
+    pasta_kpis = os.path.join(BASE_DIR, "dados_tratados", "kpis")
+    os.makedirs(pasta_kpis, exist_ok=True)
+    
+    print("\nSalvando KPIs individuais...")
+    for nome, tabela in resultados.items():
+        if tabela is None:
+            continue
+        
+        # Limpa o nome do arquivo (ex: "KPI 1 - Visao geral" vira "kpi_01_visao_geral.csv")
+        nome_arquivo = nome.lower().replace(" - ", "_").replace(" ", "_").replace("__", "_") + ".csv"
+        caminho = os.path.join(pasta_kpis, nome_arquivo)
+        
+        # Salva no formato CSV correto (separado por ;)
+        tabela.to_csv(caminho, index=False, sep=";", encoding="utf-8")
+        print(f"  -> {nome_arquivo}")
+        
+    print(f"\nTodos os KPIs foram salvos em: {pasta_kpis}")
 
 
 if __name__ == "__main__":
