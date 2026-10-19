@@ -301,7 +301,7 @@ resumo_conf = resumo_conf.sort_values("taxa_conformidade", ascending=False)
 fig2 = px.bar(
     resumo_conf, x="filial", y="taxa_conformidade",
     color="taxa_conformidade", 
-    color_continuous_scale="RdBu", # AZUL (alto) -> BRANCO -> VERMELHO (baixo)
+    color_continuous_scale="RdBu", # AZUL -> BRANCO -> VERMELHO (Regra do calor)
     labels={"filial": "Filial", "taxa_conformidade": "Taxa de Conformidade (%)"},
     text="taxa_conformidade",
 )
@@ -335,7 +335,7 @@ fig3.add_trace(go.Bar(
 ))
 fig3.add_trace(go.Bar(
     x=resumo_mes["mes"], y=resumo_mes["nc"],
-    name="NCs", marker_color="#C0392B", # VERMELHO (NCs)
+    name="NCs", marker_color="#C0392B", # VERMELHO
     text=resumo_mes["nc"],
     textposition="outside",
     textfont=dict(color="#2C3E50", size=12),
@@ -442,13 +442,13 @@ with col_d:
 
     ordem_class = ["Ótimo", "Bom", "Regular", "Ruim", "Péssimo"]
     
-    # ESCALA DE CRITICIDADE: Azul -> Laranja -> Vermelho
+    # MANTIDO VERDE (Conforme sua orientação)
     cores_class = {
-        "Ótimo": "#1F618D",   # Azul escuro
-        "Bom": "#85C1E9",     # Azul claro
-        "Regular": "#F4D03F", # Amarelo
-        "Ruim": "#E67E22",    # Laranja
-        "Péssimo": "#C0392B", # Vermelho
+        "Ótimo": "#2E7D32",   # Verde Escuro
+        "Bom": "#66BB6A",     # Verde Claro
+        "Regular": "#F9A825", # Amarelo
+        "Ruim": "#EF6C00",    # Laranja
+        "Péssimo": "#C62828", # Vermelho
     }
 
     fig6 = px.pie(
@@ -481,10 +481,11 @@ if df_n_f is not None and len(df_n_f) > 0:
         )
     )
 
+    # MANTIDO VERDE (Volume de NCs não é calor, é quantidade)
     fig7 = px.bar(
         resumo_unidade, x="total", y="codigo_unidade",
         orientation="h",
-        color="total", color_continuous_scale="Reds",
+        color="total", color_continuous_scale="Greens", 
         labels={"total": "Total de NCs", "codigo_unidade": "Unidade"},
     )
     fig7.update_layout(coloraxis_showscale=False)
@@ -500,9 +501,18 @@ if df_n_f is not None and len(df_n_f) > 0:
         total=("codigo_nc", "count"),
     ).reset_index().sort_values("total", ascending=False)
 
+    # ESCALA DE GRAVIDADE (Azul -> Vermelho) para as barras
+    # Obs: Como é px.bar, o ideal é usar a cor fixa por gravidade
+    cores_grav_bar = {
+        "Baixa": "#85C1E9",   
+        "Média": "#F4D03F",   
+        "Alta": "#E67E22",    
+        "Crítica": "#C0392B", 
+    }
+
     fig8 = px.bar(
         resumo_grav, x="gravidade", y="total",
-        color="total", color_continuous_scale="Reds",
+        color="gravidade", color_discrete_map=cores_grav_bar,
         labels={"gravidade": "Gravidade", "total": "NCs"},
         text="total",
     )
@@ -512,7 +522,7 @@ if df_n_f is not None and len(df_n_f) > 0:
         textfont=dict(color="#2C3E50", size=13),
         cliponaxis=False,
     )
-    fig8.update_layout(coloraxis_showscale=False)
+    fig8.update_layout(showlegend=False)
     aplicar_tema(fig8, 400)
     st.plotly_chart(fig8, use_container_width=True, theme=None)
 
@@ -529,10 +539,11 @@ if df_n_f is not None and len(df_n_f) > 0:
     )
     resumo_cod = resumo_cod.sort_values("total", ascending=True)
 
+    # MANTIDO VERDE para o ranking
     fig9 = px.bar(
         resumo_cod, x="total", y="codigo_nc",
         orientation="h",
-        color="total", color_continuous_scale="Reds",
+        color="total", color_continuous_scale="Greens",
         labels={"total": "Total de NCs", "codigo_nc": "Código"},
     )
     fig9.update_layout(coloraxis_showscale=False)
@@ -587,10 +598,10 @@ if df_n_f is not None and len(df_n_f) > 0:
     fig11 = go.Figure()
     # ESCALA DE GRAVIDADE: Azul -> Laranja -> Vermelho
     cores_grav = {
-        "Baixa": "#85C1E9",   # Azul claro
-        "Média": "#F4D03F",   # Amarelo
-        "Alta": "#E67E22",    # Laranja
-        "Crítica": "#C0392B", # Vermelho
+        "Baixa": "#85C1E9",   
+        "Média": "#F4D03F",   
+        "Alta": "#E67E22",    
+        "Crítica": "#C0392B", 
     }
     for g in ordem_grav:
         fig11.add_trace(go.Bar(
@@ -625,9 +636,10 @@ if df_n_f is not None and len(df_n_f) > 0 and "dia_semana" in df_a_f.columns:
     )
     resumo_nc_dia = resumo_nc_dia.sort_values("ordem")
 
+    # MANTIDO VERDE
     fig12 = px.bar(
         resumo_nc_dia, x="dia_semana_pt", y="total",
-        color="total", color_continuous_scale="Blues",
+        color="total", color_continuous_scale="Greens",
         labels={"dia_semana_pt": "Dia", "total": "NCs"},
         text="total",
     )
