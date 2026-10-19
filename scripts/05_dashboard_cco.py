@@ -259,7 +259,7 @@ fig1.add_trace(go.Bar(
     x=resumo_filial["filial"],
     y=resumo_filial["total"],
     name="Total de análises",
-    marker_color="#4C9F70", # MANTIDO VERDE
+    marker_color="#4C9F70", # VERDE (Volume)
     yaxis="y1",
     text=resumo_filial["total"],
     textposition="outside",
@@ -298,10 +298,11 @@ resumo_conf = resumo_conf.assign(
 )
 resumo_conf = resumo_conf.sort_values("taxa_conformidade", ascending=False)
 
+# VERDE (Como você pediu para trocar o azul daqui)
 fig2 = px.bar(
     resumo_conf, x="filial", y="taxa_conformidade",
     color="taxa_conformidade", 
-    color_continuous_scale="RdBu", # AZUL -> BRANCO -> VERMELHO (Regra do calor)
+    color_continuous_scale="Greens", 
     labels={"filial": "Filial", "taxa_conformidade": "Taxa de Conformidade (%)"},
     text="taxa_conformidade",
 )
@@ -327,7 +328,7 @@ resumo_mes = df_a_f.groupby("mes").agg(
 fig3 = go.Figure()
 fig3.add_trace(go.Bar(
     x=resumo_mes["mes"], y=resumo_mes["total"],
-    name="Análises", marker_color="#4C9F70", # MANTIDO VERDE
+    name="Análises", marker_color="#4C9F70", # VERDE
     text=resumo_mes["total"],
     textposition="outside",
     textfont=dict(color="#2C3E50", size=12),
@@ -378,7 +379,7 @@ fig4.add_trace(go.Bar(
     x=resumo_dia["dia_semana_pt"],
     y=resumo_dia["total"],
     name="Total de análises",
-    marker_color="#4C9F70", # MANTIDO VERDE
+    marker_color="#4C9F70", # VERDE
     yaxis="y1",
     text=resumo_dia["total"],
     textposition="outside",
@@ -442,13 +443,13 @@ with col_d:
 
     ordem_class = ["Ótimo", "Bom", "Regular", "Ruim", "Péssimo"]
     
-    # MANTIDO VERDE (Conforme sua orientação)
+    # TERMÔMETRO DE CRITICIDADE (Azul para Vermelho)
     cores_class = {
-        "Ótimo": "#2E7D32",   # Verde Escuro
-        "Bom": "#66BB6A",     # Verde Claro
-        "Regular": "#F9A825", # Amarelo
-        "Ruim": "#EF6C00",    # Laranja
-        "Péssimo": "#C62828", # Vermelho
+        "Ótimo": "#1F618D",   # Azul Escuro (Melhor)
+        "Bom": "#85C1E9",     # Azul Claro
+        "Regular": "#F4D03F", # Amarelo
+        "Ruim": "#E67E22",    # Laranja
+        "Péssimo": "#C0392B", # Vermelho (Pior)
     }
 
     fig6 = px.pie(
@@ -468,7 +469,7 @@ with col_d:
     st.plotly_chart(fig6, use_container_width=True, theme=None)
 
 
-# ---------- Gráfico 7: Unidades com Maior Incidência (sem números) ----------
+# ---------- Gráfico 7: Unidades com Maior Incidência ----------
 st.subheader("Unidades com Maior Incidência de NCs")
 
 if df_n_f is not None and len(df_n_f) > 0:
@@ -481,11 +482,11 @@ if df_n_f is not None and len(df_n_f) > 0:
         )
     )
 
-    # MANTIDO VERDE (Volume de NCs não é calor, é quantidade)
+    # TERMÔMETRO: Azul (pouco) para Vermelho (muito) - Usando escala RdBu_r (Red-Blue reversed)
     fig7 = px.bar(
         resumo_unidade, x="total", y="codigo_unidade",
         orientation="h",
-        color="total", color_continuous_scale="Greens", 
+        color="total", color_continuous_scale="RdBu_r", 
         labels={"total": "Total de NCs", "codigo_unidade": "Unidade"},
     )
     fig7.update_layout(coloraxis_showscale=False)
@@ -501,13 +502,12 @@ if df_n_f is not None and len(df_n_f) > 0:
         total=("codigo_nc", "count"),
     ).reset_index().sort_values("total", ascending=False)
 
-    # ESCALA DE GRAVIDADE (Azul -> Vermelho) para as barras
-    # Obs: Como é px.bar, o ideal é usar a cor fixa por gravidade
+    # TERMÔMETRO: Azul (baixo) para Vermelho (crítico)
     cores_grav_bar = {
-        "Baixa": "#85C1E9",   
-        "Média": "#F4D03F",   
-        "Alta": "#E67E22",    
-        "Crítica": "#C0392B", 
+        "Baixa": "#85C1E9",   # Azul claro
+        "Média": "#F4D03F",   # Amarelo
+        "Alta": "#E67E22",    # Laranja
+        "Crítica": "#C0392B", # Vermelho
     }
 
     fig8 = px.bar(
@@ -527,7 +527,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     st.plotly_chart(fig8, use_container_width=True, theme=None)
 
 
-# ---------- Gráfico 9: Itens com Maior Reincidência (sem números) ----------
+# ---------- Gráfico 9: Itens com Maior Reincidência ----------
 st.subheader("Itens do Checklist com Maior Reincidência")
 
 if df_n_f is not None and len(df_n_f) > 0:
@@ -539,11 +539,11 @@ if df_n_f is not None and len(df_n_f) > 0:
     )
     resumo_cod = resumo_cod.sort_values("total", ascending=True)
 
-    # MANTIDO VERDE para o ranking
+    # TERMÔMETRO: Azul para Vermelho
     fig9 = px.bar(
         resumo_cod, x="total", y="codigo_nc",
         orientation="h",
-        color="total", color_continuous_scale="Greens",
+        color="total", color_continuous_scale="RdBu_r",
         labels={"total": "Total de NCs", "codigo_nc": "Código"},
     )
     fig9.update_layout(coloraxis_showscale=False)
@@ -561,10 +561,10 @@ if df_n_f is not None and len(df_n_f) > 0:
     resumo_cap = resumo_cap.assign(cap_int=resumo_cap["capitulo_nc"].astype(int))
     resumo_cap = resumo_cap.sort_values("cap_int")
 
-    # MANTIDO VERDE
+    # TERMÔMETRO: Azul para Vermelho
     fig10 = px.bar(
         resumo_cap, x="capitulo_nc", y="total",
-        color="total", color_continuous_scale="Greens", 
+        color="total", color_continuous_scale="RdBu_r", 
         labels={"capitulo_nc": "Área", "total": "NCs"},
         text="total",
     )
@@ -579,7 +579,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     st.plotly_chart(fig10, use_container_width=True, theme=None)
 
 
-# ---------- Gráfico 11: Filial x Gravidade (sem números dentro) ----------
+# ---------- Gráfico 11: Filial x Gravidade ----------
 st.subheader("Filial x Gravidade")
 
 if df_n_f is not None and len(df_n_f) > 0:
@@ -596,7 +596,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     pivot = pivot.sort_values("total", ascending=False).drop(columns="total").reset_index()
 
     fig11 = go.Figure()
-    # ESCALA DE GRAVIDADE: Azul -> Laranja -> Vermelho
+    # TERMÔMETRO EMPILHADO: Azul para Vermelho
     cores_grav = {
         "Baixa": "#85C1E9",   
         "Média": "#F4D03F",   
@@ -636,10 +636,10 @@ if df_n_f is not None and len(df_n_f) > 0 and "dia_semana" in df_a_f.columns:
     )
     resumo_nc_dia = resumo_nc_dia.sort_values("ordem")
 
-    # MANTIDO VERDE
+    # TERMÔMETRO: Azul para Vermelho
     fig12 = px.bar(
         resumo_nc_dia, x="dia_semana_pt", y="total",
-        color="total", color_continuous_scale="Greens",
+        color="total", color_continuous_scale="RdBu_r",
         labels={"dia_semana_pt": "Dia", "total": "NCs"},
         text="total",
     )
@@ -654,7 +654,7 @@ if df_n_f is not None and len(df_n_f) > 0 and "dia_semana" in df_a_f.columns:
     st.plotly_chart(fig12, use_container_width=True, theme=None)
 
 
-# ---------- Gráfico 13: Gravidade das NCs por Área (sem números dentro) ----------
+# ---------- Gráfico 13: Gravidade das NCs por Área ----------
 st.subheader("Gravidade das NCs por Área")
 
 if df_n_f is not None and len(df_n_f) > 0:
@@ -670,7 +670,7 @@ if df_n_f is not None and len(df_n_f) > 0:
     pivot_cap = pivot_cap.reset_index().sort_values("capitulo_nc", key=lambda s: s.astype(int))
 
     fig13 = go.Figure()
-    # ESCALA DE GRAVIDADE: Azul -> Laranja -> Vermelho
+    # TERMÔMETRO EMPILHADO: Azul para Vermelho
     cores_grav = {
         "Baixa": "#85C1E9",   
         "Média": "#F4D03F",   
@@ -691,146 +691,3 @@ if df_n_f is not None and len(df_n_f) > 0:
     )
     aplicar_tema(fig13, 400)
     st.plotly_chart(fig13, use_container_width=True, theme=None)
-
-
-st.divider()
-st.header("Previsão de Criticidade")
-st.markdown(
-    """
-    Utilize o formulário abaixo para simular as condições de uma não conformidade.
-    O modelo **Random Forest** irá prever se ela será crítica ou não,
-    com base nas variáveis selecionadas.
-    """
-)
-
-if modelo is None or encoders is None:
-    st.warning(
-        "Modelo não encontrado. Rode `python3 scripts/06_machine_learning_cco.py` "
-        "para gerar os arquivos `modelo/modelo_cco.pkl` e `modelo/encoders_cco.pkl`."
-    )
-else:
-    with st.form("form_previsao"):
-        col_e, col_f = st.columns(2)
-
-        with col_e:
-            filial_input = st.selectbox(
-                "Filial",
-                options=sorted(df_a["filial"].dropna().unique().tolist()),
-            )
-            classificacao_input = st.selectbox(
-                "Classificação",
-                options=sorted(df_n["classificacao"].dropna().unique().tolist()),
-            )
-
-        with col_f:
-            unidade_input = st.selectbox(
-                "Código da unidade",
-                options=sorted(df_n["codigo_unidade"].dropna().unique().tolist()),
-            )
-            capitulo_input = st.selectbox(
-                "Área do checklist",
-                options=sorted(df_n["capitulo_nc"].dropna().unique().tolist()),
-            )
-
-        submit = st.form_submit_button("Prever Criticidade", use_container_width=True)
-
-    if submit:
-        try:
-            entrada = {
-                "filial": filial_input,
-                "classificacao": classificacao_input,
-                "codigo_unidade": unidade_input,
-                "capitulo_nc": capitulo_input,
-            }
-
-            linha_codificada = {}
-            for feat in FEATURES:
-                valor = str(entrada[feat])
-                le = encoders[feat]
-                if valor in le.classes_:
-                    linha_codificada[feat] = int(le.transform([valor])[0])
-                else:
-                    linha_codificada[feat] = 0
-                    st.warning(
-                        f"Valor '{valor}' não visto no treino para '{feat}'. "
-                        f"Usando valor padrão."
-                    )
-
-            X_input = pd.DataFrame([linha_codificada])[FEATURES].astype(float)
-
-            pred = modelo.predict(X_input)[0]
-            proba = modelo.predict_proba(X_input)[0]
-
-            le_target = encoders[TARGET]
-            classe_prevista = le_target.inverse_transform([pred])[0]
-
-            st.markdown("### Resultado da Previsão")
-
-            cores = {
-                "Crítica": "#C0392B",
-                "Outra": "#4C9F70",
-            }
-
-            cor = cores.get(classe_prevista, "#7F8C8D")
-
-            st.markdown(
-                f"""
-                <div style="
-                    background-color: #F8F9FA;
-                    border-left: 6px solid {cor};
-                    padding: 20px;
-                    border-radius: 6px;
-                    margin: 10px 0;
-                ">
-                    <div style="color: #7F8C8D; font-size: 0.85rem;
-                                text-transform: uppercase; letter-spacing: 0.5px;
-                                margin-bottom: 4px;">
-                        Classificação prevista
-                    </div>
-                    <div style="color: {cor}; font-size: 1.8rem; font-weight: 600;">
-                        {classe_prevista}
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            st.markdown("#### Probabilidade por Classe")
-            classes_originais = list(le_target.classes_)
-            df_proba = pd.DataFrame({
-                "Classe": classes_originais,
-                "Probabilidade (%)": [round(p * 100, 2) for p in proba],
-            }).sort_values("Probabilidade (%)", ascending=True)
-
-            fig_pred = px.bar(
-                df_proba,
-                x="Probabilidade (%)",
-                y="Classe",
-                orientation="h",
-                color="Probabilidade (%)",
-                color_continuous_scale="Blues",
-                text="Probabilidade (%)",
-            )
-            fig_pred.update_traces(
-                texttemplate="%{text:.1f}%",
-                textposition="outside",
-                textfont=dict(color="#2C3E50", size=12),
-                cliponaxis=False,
-            )
-            fig_pred.update_layout(showlegend=False, coloraxis_showscale=False)
-            aplicar_tema(fig_pred, 300)
-            st.plotly_chart(fig_pred, use_container_width=True, theme=None)
-
-            st.caption(
-                "Esta previsão é baseada em padrões estatísticos históricos e "
-                "não deve ser utilizada como única fonte para decisões operacionais."
-            )
-
-        except Exception as e:
-            st.error(f"Erro ao fazer a previsão: {e}")
-
-
-st.divider()
-st.caption(
-    "Desenvolvido por Jhonatan L. Santos para Terceirize Mais / Costa Oeste © 2026. Todos os direitos reservados."
-)
