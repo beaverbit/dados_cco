@@ -192,9 +192,10 @@ def kpi_nc_por_classificacao(df_n):
 
 def kpi_nc_por_capitulo(df_n):
     print("\n" + "=" * 60)
-    print("KPI 9: NCs por capítulo do checklist")
+    print("KPI 9: NCs por área do checklist")
     print("=" * 60)
 
+    # CORRIGIDO AQUI: voltou a ser "capitulo_nc"
     resumo = df_n.groupby("capitulo_nc").agg(
         total=("codigo_nc", "count"),
         criticas=("gravidade", lambda s: (s == "Crítica").sum()),
@@ -303,7 +304,8 @@ if __name__ == "__main__":
     if df_n is not None:
         resultados["KPI 7 - NC por gravidade"] = kpi_nc_por_gravidade(df_n)
         resultados["KPI 8 - NC por classificacao"] = kpi_nc_por_classificacao(df_n)
-        resultados["KPI 9 - NC por capitulo"] = kpi_nc_por_capitulo(df_n)
+        # CORRIGIDO AQUI TAMBÉM
+        resultados["KPI 9 - NC por area"] = kpi_nc_por_capitulo(df_n)
         resultados["KPI 10 - Top codigos NC"] = kpi_top_ncs(df_n)
         resultados["KPI 11 - NC por filial"] = kpi_nc_por_filial(df_n)
         resultados["KPI 12 - Filial x Gravidade"] = kpi_filial_x_gravidade(df_n)

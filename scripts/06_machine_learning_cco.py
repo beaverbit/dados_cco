@@ -20,6 +20,10 @@ PASTA_IMAGENS = os.path.join(BASE_DIR, "imagens")
 FEATURES = ["filial", "classificacao", "codigo_unidade", "capitulo_nc"]
 TARGET = "critica_bin"
 
+# Cores (Tema Claro)
+COR_TEXTO = "#2C3E50"
+COR_BORDA = "#B0BEC5"
+
 
 def carregar():
     print("Carregando NCs...")
@@ -96,7 +100,15 @@ def matriz_confusao(y_te, y_p, encoders):
         labels=dict(x="Previsto", y="Real"),
         title="Matriz de Confusão",
     )
-    fig.update_layout(height=500)
+    fig.update_layout(
+        template="plotly_white",
+        height=500,
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FFFFFF",
+        font=dict(color=COR_TEXTO, size=13),
+        title_font=dict(color=COR_TEXTO, size=17),
+        margin=dict(l=40, r=40, t=60, b=60)
+    )
     os.makedirs(PASTA_IMAGENS, exist_ok=True)
     caminho = os.path.join(PASTA_IMAGENS, "09_matriz_confusao_cco.png")
     fig.write_image(caminho, width=800, height=600, scale=1.5)
@@ -112,11 +124,25 @@ def importancia(modelo):
 
     fig = px.bar(
         imp, x="importancia", y="feature", orientation="h",
-        color="importancia", color_continuous_scale="Viridis",
+        color="importancia", color_continuous_scale="Greens",
         labels={"importancia": "Importância", "feature": ""},
         title="Importância das Features",
     )
-    fig.update_layout(coloraxis_showscale=False, height=400)
+    # Adiciona contorno e tira a legenda de cor
+    fig.update_traces(
+        marker_line_color=COR_BORDA, marker_line_width=1,
+        text=imp["importancia"].round(3), textposition="outside", cliponaxis=False
+    )
+    fig.update_layout(
+        template="plotly_white",
+        coloraxis_showscale=False, 
+        height=400,
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FFFFFF",
+        font=dict(color=COR_TEXTO, size=13),
+        title_font=dict(color=COR_TEXTO, size=17),
+        margin=dict(l=40, r=40, t=60, b=60)
+    )
     caminho = os.path.join(PASTA_IMAGENS, "10_importancia_features_cco.png")
     fig.write_image(caminho, width=900, height=500, scale=1.5)
     print(f"  -> {caminho}")

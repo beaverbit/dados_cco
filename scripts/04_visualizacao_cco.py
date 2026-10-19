@@ -1,5 +1,5 @@
 # 04_visualizacao_cco.py
-# Meu objetivo: gerar os gráficos estáticos dos KPIs do CCO usando Plotly + kaleido.
+# Meu objetivo: gerar os gráficos estáticos dos KPIs do CCO.
 
 import pandas as pd
 import plotly.express as px
@@ -13,13 +13,14 @@ ARQ_ANALISES = os.path.join(BASE_DIR, "dados_tratados", "analises_limpas.csv")
 ARQ_NCS = os.path.join(BASE_DIR, "dados_tratados", "nao_conformidades_limpas.csv")
 PASTA_IMAGENS = os.path.join(BASE_DIR, "imagens")
 
-GRAVIDADES_ORDEM = ["Baixa", "Média", "Alta", "Crítica"]
-CORES_GRAVIDADE = {
-    "Baixa": "#2ecc71",
-    "Média": "#f1c40f",
-    "Alta": "#e67e22",
-    "Crítica": "#c0392b",
-}
+# Cores (Hex Strings)
+COR_VERDE_ESCURO = "#2E7D32"
+COR_VERDE_CLARO = "#A5D6A7"
+COR_AMARELO = "#F9A825"
+COR_LARANJA = "#EF6C00"
+COR_VERMELHO = "#C62828"
+COR_TEXTO = "#2C3E50"
+COR_BORDA = "#B0BEC5"
 
 
 def carregar():
@@ -29,6 +30,9 @@ def carregar():
             df_a["data_da_avaliacao"], errors="coerce"
         )
     )
+    # Filtra igual ao dashboard e PDF
+    df_a = df_a[df_a["resultado"].notna()].reset_index(drop=True)
+    
     df_n = None
     if os.path.exists(ARQ_NCS):
         df_n = pd.read_csv(ARQ_NCS, sep=";", encoding="utf-8", low_memory=False)
@@ -42,6 +46,21 @@ def salvar(fig, nome):
     print(f"  -> {caminho}")
 
 
+def aplicar_tema(fig, altura=600):
+    fig.update_layout(
+        template="plotly_white",
+        height=altura,
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FFFFFF",
+        font=dict(color=COR_TEXTO, size=13),
+        title_font=dict(color=COR_TEXTO, size=17),
+        margin=dict(l=40, r=40, t=60, b=60),
+    )
+    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#E9ECEF')
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#E9ECEF')
+    return fig
+
+
 def graf_resultados(df_a):
     print("\nGráfico 1: Distribuição de resultados")
     contagem = df_a["resultado"].value_counts().reset_index()
@@ -51,13 +70,13 @@ def graf_resultados(df_a):
     for r in contagem["resultado"]:
         rl = r.lower()
         if rl == "conforme":
-            cores.append("#2ecc71")
+            cores.append(COR_VERDE_ESCURO)
         elif "observação" in rl:
-            cores.append("#f1c40f")
+            cores.append(COR_AMARELO)
         elif "não" in rl:
-            cores.append("#c0392b")
+            cores.append(COR_VERMELHO)
         else:
-            cores.append("#95a5a6")
+            cores.append("#95A5A6")
 
     fig = go.Figure(data=[go.Pie(
         labels=contagem["resultado"],
@@ -65,8 +84,10 @@ def graf_resultados(df_a):
         marker=dict(colors=cores),
         hole=0,
         textinfo="label+percent",
+        textfont=dict(color="#FFFFFF", size=13)
     )])
     fig.update_layout(title="Distribuição dos resultados das análises")
+    aplicar_tema(fig)
     salvar(fig, "01_distribuicao_resultados.png")
 
 
@@ -80,11 +101,13 @@ def graf_por_filial(df_a):
     fig = go.Figure()
     fig.add_trace(go.Bar(
         x=resumo["filial"], y=resumo["total"],
-        name="Total de análises", marker_color="steelblue",
+        name="Total de análises", marker_color=COR_VERDE_ESCURO,
+        text=resumo["total"], textposition="outside", cliponaxis=False
     ))
     fig.add_trace(go.Bar(
         x=resumo["filial"], y=resumo["nc"],
-        name="Total de NCs", marker_color="crimson",
+        name="Total de NCs", marker_color=COR_VERMELHO,
+        text=resumo["nc"], textposition="outside", cliponaxis=False
     ))
     fig.update_layout(
         title="Análises e NCs por filial",
@@ -93,6 +116,7 @@ def graf_por_filial(df_a):
         yaxis_title="Quantidade",
         xaxis_tickangle=-30,
     )
+    aplicar_tema(fig)
     salvar(fig, "02_analises_nc_por_filial.png")
 
 
@@ -104,11 +128,17 @@ def graf_por_analista(df_a):
 
     fig = px.bar(
         resumo, x="total", y="analista", orientation="h",
-        color="total", color_continuous_scale="Viridis",
+        color="total", color_continuous_scale="Greens",
         labels={"total": "Total de análises", "analista": ""},
         title="Produtividade por analista (top 15)",
     )
+    fig.update_traces(
+        marker_line_color=COR_BORDA, marker_line_width=1,
+        text=resumo["total"], textposition="inside", 
+        insidetextanchor="end", textfont=dict(color="#FFFFFF")
+    )
     fig.update_layout(coloraxis_showscale=False)
+    aplicar_tema(fig)
     salvar(fig, "03_analises_por_analista.png")
 
 
@@ -128,11 +158,13 @@ def graf_por_mes(df_a):
     fig = go.Figure()
     fig.add_trace(go.Bar(
         x=resumo["periodo"], y=resumo["total"],
-        name="Análises", marker_color="steelblue",
+        name="Análises", marker_color=COR_VERDE_ESCURO,
+        text=resumo["total"], textposition="outside", cliponaxis=False
     ))
     fig.add_trace(go.Bar(
         x=resumo["periodo"], y=resumo["nc"],
-        name="NCs", marker_color="crimson",
+        name="NCs", marker_color=COR_VERMELHO,
+        text=resumo["nc"], textposition="outside", cliponaxis=False
     ))
     fig.update_layout(
         title="Análises e NCs por mês",
@@ -140,24 +172,36 @@ def graf_por_mes(df_a):
         xaxis_title="Período",
         yaxis_title="Quantidade",
     )
+    aplicar_tema(fig)
     salvar(fig, "04_analises_por_mes.png")
 
 
 def graf_nc_gravidade(df_n):
     print("\nGráfico 5: NCs por gravidade")
-    resumo = df_n["gravidade"].value_counts().reindex(GRAVIDADES_ORDEM).fillna(0).reset_index()
+    resumo = df_n["gravidade"].value_counts().reindex(["Baixa", "Média", "Alta", "Crítica"]).fillna(0).reset_index()
     resumo.columns = ["gravidade", "total"]
+
+    cores_grav = {
+        "Baixa": COR_VERDE_ESCURO,
+        "Média": COR_AMARELO,
+        "Alta": COR_LARANJA,
+        "Crítica": COR_VERMELHO,
+    }
 
     fig = px.bar(
         resumo, x="gravidade", y="total",
         color="gravidade",
-        color_discrete_map=CORES_GRAVIDADE,
+        color_discrete_map=cores_grav,
         text="total",
         labels={"gravidade": "Gravidade", "total": "Total de NCs"},
         title="Distribuição de NCs por gravidade",
     )
-    fig.update_traces(textposition="outside")
+    fig.update_traces(
+        textposition="outside", cliponaxis=False,
+        marker_line_color=COR_BORDA, marker_line_width=1
+    )
     fig.update_layout(showlegend=False)
+    aplicar_tema(fig)
     salvar(fig, "05_nc_por_gravidade.png")
 
 
@@ -168,32 +212,41 @@ def graf_nc_classificacao(df_n):
 
     fig = px.bar(
         resumo, x="total", y="classificacao", orientation="h",
-        color="total", color_continuous_scale="OrRd",
+        color="total", color_continuous_scale="Greens",
         text="total",
         labels={"total": "Total", "classificacao": ""},
         title="NCs por classificação",
     )
-    fig.update_traces(textposition="outside")
+    fig.update_traces(
+        textposition="outside", cliponaxis=False,
+        marker_line_color=COR_BORDA, marker_line_width=1
+    )
     fig.update_layout(coloraxis_showscale=False)
+    aplicar_tema(fig)
     salvar(fig, "06_nc_por_classificacao.png")
 
 
-def graf_nc_capitulo(df_n):
-    print("\nGráfico 7: NCs por capítulo")
+def graf_nc_area(df_n):
+    print("\nGráfico 7: NCs por área")
+    # CORRIGIDO AQUI: Voltou a ser capitulo_nc
     resumo = df_n.groupby("capitulo_nc").size().reset_index(name="total")
     resumo = resumo.assign(cap_int=resumo["capitulo_nc"].astype(int))
     resumo = resumo.sort_values("cap_int")
 
     fig = px.bar(
         resumo, x="capitulo_nc", y="total",
-        color="total", color_continuous_scale="Viridis",
+        color="total", color_continuous_scale="Greens",
         text="total",
-        labels={"capitulo_nc": "Capítulo", "total": "Total de NCs"},
-        title="NCs por capítulo do checklist",
+        labels={"capitulo_nc": "Área", "total": "Total de NCs"},
+        title="NCs por área do checklist",
     )
-    fig.update_traces(textposition="outside")
+    fig.update_traces(
+        textposition="outside", cliponaxis=False,
+        marker_line_color=COR_BORDA, marker_line_width=1
+    )
     fig.update_layout(coloraxis_showscale=False)
-    salvar(fig, "07_nc_por_capitulo.png")
+    aplicar_tema(fig)
+    salvar(fig, "07_nc_por_area.png")
 
 
 def graf_filial_x_gravidade(df_n):
@@ -202,18 +255,26 @@ def graf_filial_x_gravidade(df_n):
         index="filial", columns="gravidade", values="codigo_nc",
         aggfunc="count", fill_value=0,
     )
-    for g in GRAVIDADES_ORDEM:
+    for g in ["Baixa", "Média", "Alta", "Crítica"]:
         if g not in pivot.columns:
             pivot[g] = 0
-    pivot = pivot[GRAVIDADES_ORDEM]
+    pivot = pivot[["Baixa", "Média", "Alta", "Crítica"]]
     pivot = pivot.assign(total=pivot.sum(axis=1))
     pivot = pivot.sort_values("total", ascending=True).drop(columns="total").reset_index()
 
+    cores_grav = {
+        "Baixa": COR_VERDE_ESCURO,
+        "Média": COR_AMARELO,
+        "Alta": COR_LARANJA,
+        "Crítica": COR_VERMELHO,
+    }
+
     fig = go.Figure()
-    for g in GRAVIDADES_ORDEM:
+    for g in ["Baixa", "Média", "Alta", "Crítica"]:
         fig.add_trace(go.Bar(
             y=pivot["filial"], x=pivot[g], name=g, orientation="h",
-            marker_color=CORES_GRAVIDADE[g],
+            marker_color=cores_grav[g],
+            marker_line_color=COR_BORDA, marker_line_width=1,
         ))
     fig.update_layout(
         title="NCs por filial e gravidade",
@@ -222,6 +283,7 @@ def graf_filial_x_gravidade(df_n):
         yaxis_title="",
         legend_title="Gravidade",
     )
+    aplicar_tema(fig)
     salvar(fig, "08_filial_x_gravidade.png")
 
 
@@ -236,7 +298,7 @@ if __name__ == "__main__":
     if df_n is not None and len(df_n) > 0:
         graf_nc_gravidade(df_n)
         graf_nc_classificacao(df_n)
-        graf_nc_capitulo(df_n)
+        graf_nc_area(df_n)
         graf_filial_x_gravidade(df_n)
 
     print("\nGráficos gerados.")
